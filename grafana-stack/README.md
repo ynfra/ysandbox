@@ -12,11 +12,14 @@
 docker compose up
 ```
 
+## Architecture
+
+![](.docs/arch.png)
+
 ## Examples
 
 ![](.docs/grafana1.png)
 ![](.docs/grafana2.png)
-![](.docs/grafana3.png)
 ![](.docs/mimir1.png)
 ![](.docs/minio1.png)
 ![](.docs/prometheus1.png)
