@@ -1,0 +1,13 @@
+services:
+  nginx:
+    image: nginx:1.27
+    volumes:
+        - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:80
+
+  icons:
+    image: iconify/api:latest
+    platform: linux/amd64
+    ports:
+      - 3000:3000
