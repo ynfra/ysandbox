@@ -1,0 +1,32 @@
+# Squid configuration
+http_port 3128 ssl-bump generate-host-certificates=on cert=/etc/squid/squid-ca.pem dynamic_cert_mem_cache_size=16MB
+
+# Debug options
+debug_options ALL,1
+
+# Enable SSL interception
+ssl_bump peek step1
+ssl_bump bump all
+sslcrtd_program /usr/lib64/squid/security_file_certgen -s /var/lib/ssl_db -M 4MB
+
+# Cache settings
+cache_dir ufs /srv/data 51200 16 256
+cache_mem 8192 MB
+maximum_object_size 10 MB
+refresh_pattern .* 0 20% 1440 # 24 hours expiration
+
+# Logging
+access_log stdio:/srv/logs/access.log
+cache_log /srv/logs/cache.log
+
+# Hierarchy settings - parent proxy
+cache_peer ${PROXY_HOST} parent ${PROXY_PORT} 0 default no-query login=${PROXY_USER}:${PROXY_PASS}
+never_direct allow all
+
+# ACL settings
+acl all src all
+http_access allow all
+
+# DNS settings
+dns_nameservers 8.8.8.8 8.8.4.4
+dns_v4_first on
