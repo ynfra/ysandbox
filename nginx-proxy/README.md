@@ -18,14 +18,6 @@ docker compose up
 server {
     listen 80;
 
-    # Swift
-    location ~ ^/debug/(?<account>[^/]+)/(?<container>[^/]+)/(?<file>[^/]+)$ {
-        proxy_set_header Host $host;
-        proxy_set_header X-Token "Test";
-        proxy_set_header Accept "*/*";
-        proxy_pass http://app/v1/AUTH_$account/$container/$file;
-    }
-
     # Index
     location / {
         proxy_pass http://app;
@@ -39,9 +31,7 @@ server {
 
 ## Examples
 
-1. Request
-
 ```
-❯ curl -i http://localhost:8080/
-{"url":"http://app/","headers":{"host":"app","connection":"close","user-agent":"curl/8.7.1","accept":"*/*"},"method":"GET"}
+❯ curl localhost:8080/foo/bar/xx/image.png
+{"url":"http://localhost/v1/AUTH_myaccount/foo-bar-xx/image.png","headers":{"host":"localhost","connection":"close","user-agent":"curl/8.7.1","accept":"*/*","x-real-ip":"192.168.147.1","x-forwarded-for":"192.168.147.1","x-forwarded-proto":"http"},"method":"GET"}
 ```
