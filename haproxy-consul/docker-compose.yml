@@ -1,0 +1,60 @@
+name: haproxy-consul
+
+services:
+  consul:
+    image: hashicorp/consul:1.21
+    restart: unless-stopped
+    command: consul agent -dev -ui -client=0.0.0.0
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    volumes:
+      - ./.docker/consul/data:/consul/data
+
+  haproxy:
+    image: haproxy:3.2
+    restart: unless-stopped
+    depends_on:
+      - consul
+    ports:
+      - "8080:80"
+      - "8404:8404"
+    user: root
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+
+  app:
+    image: oven/bun:latest
+    restart: unless-stopped
+    command: ["bun", "/app/server.js"]
+    depends_on:
+      - consul
+    volumes:
+      - ./app/server.js:/app/server.js
+    deploy:
+      replicas: 3
+
+  init:
+    image: curlimages/curl:latest
+    restart: "no"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        for i in $$(seq 1 3); do
+          curl --request PUT \
+            --data "{
+              \"ID\": \"app-$$i\",
+              \"Name\": \"app\",
+              \"Tags\": [\"app\", \"web\"],
+              \"Address\": \"haproxy-consul-app-$$i\",
+              \"Port\": 3000,
+              \"Check\": {
+                \"HTTP\": \"http://haproxy-consul-app-$$i:3000/\",
+                \"Interval\": \"10s\"
+              }
+            }" \
+            http://consul:8500/v1/agent/service/register;
+        done
+    depends_on:
+      - consul
+      - app
