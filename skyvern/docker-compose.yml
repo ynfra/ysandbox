@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:14-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ./.docker/postgres:/var/lib/postgresql/data
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_USER=skyvern
+      - POSTGRES_PASSWORD=skyvern
+      - POSTGRES_DB=skyvern
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skyvern"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  skyvern:
+    image: public.ecr.aws/skyvern/skyvern:latest
+    restart: on-failure
+    ports:
+      - 8000:8000
+      - 9222:9222 # for cdp browser forwarding
+    volumes:
+      - ./.docker/artifacts:/data/artifacts
+      - ./.docker/videos:/data/videos
+      - ./.docker/har:/data/har
+      - ./.docker/log:/data/log
+      - ./.streamlit:/app/.streamlit
+    environment:
+        - DATABASE_STRING=postgresql+psycopg://skyvern:skyvern@postgres:5432/skyvern
+        - BROWSER_TYPE=chromium-headful
+        - ENABLE_CODE_BLOCK=true
+        - ENV=local
+        - LOG_LEVEL=DEBUG
+        - MAX_STEPS_PER_RUN=50
+        - BROWSER_ACTION_TIMEOUT_MS=5000
+        - LLM_KEY=GEMINI_2.5_FLASH_PREVIEW
+        - ENABLE_GEMINI=true
+        - GEMINI_API_KEY=YOUR_GEMINI_KEY
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/.streamlit/secrets.toml"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  skyvern-ui:
+    image: public.ecr.aws/skyvern/skyvern-ui:latest
+    restart: on-failure
+    ports:
+      - 8080:8080
+      - 9090:9090
+    volumes:
+      - ./.docker/artifacts:/data/artifacts
+      - ./.docker/videos:/data/videos
+      - ./.docker/har:/data/har
+      - ./.streamlit:/app/.streamlit
+    environment:
+        - VITE_API_BASE_URL=http://localhost:8000/api/v1
+        - VITE_ARTIFACT_API_BASE_URL=http://localhost:9090
+        - VITE_WSS_BASE_URL=ws://localhost:8000/api/v1
+        - VITE_SKYVERN_API_KEY=YOUR_API_KEY
+        - VITE_ENABLE_LOG_ARTIFACTS=false
+        - VITE_ENABLE_CODE_BLOCK=false
+    depends_on:
+      skyvern:
+        condition: service_healthy
