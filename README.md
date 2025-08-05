@@ -10,6 +10,7 @@ Examples of ynfrastructure.
 - [ysandbox/nginx-php](./nginx-php) - Nginx + PHP-FPM setup.
 - [ysandbox/nginx-proxy](./nginx-proxy) - Nginx + App (Bun.js) with proxy pass.
 - [ysandbox/nginx-swr](./nginx-swr) - Nginx + App (Bun.js) with proxy cache and stale-while-revalidate (SWR).
+- [ysandbox/skyvern](./skyvern) - Skyvern AI-powered browser automation platform with PostgreSQL.
 - [ysandbox/squid](./squid) - Squid proxy server.
 - [ysandbox/terraform-r2](./terraform-r2) - Terraform configuration for Cloudflare R2.
 - [ysandbox/windmill](./windmill) - Windmill workflow engine with Caddy.
