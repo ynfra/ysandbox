@@ -14,3 +14,4 @@ Examples of ynfrastructure.
 - [ysandbox/squid](./squid) - Squid proxy server.
 - [ysandbox/terraform-r2](./terraform-r2) - Terraform configuration for Cloudflare R2.
 - [ysandbox/windmill](./windmill) - Windmill workflow engine with Caddy.
+- [ysandbox/neko-playwright](./neko-playwright) - Neko + Playwright browser automation.
