@@ -15,3 +15,4 @@ Examples of ynfrastructure.
 - [ysandbox/terraform-r2](./terraform-r2) - Terraform configuration for Cloudflare R2.
 - [ysandbox/windmill](./windmill) - Windmill workflow engine with Caddy.
 - [ysandbox/neko-playwright](./neko-playwright) - Neko + Playwright browser automation.
+- [ysandbox/neko-stagehand](./neko-stagehand) - Neko + Stagehand browser automation.
