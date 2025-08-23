@@ -1,0 +1,18 @@
+{
+    "engines": {
+        "node": ">=22"
+    },
+    "scripts": {
+        "build": "tsc",
+        "start": "tsx index.ts",
+        "postinstall": "playwright install"
+    },
+    "dependencies": {
+        "@browserbasehq/stagehand": "latest",
+        "dotenv": "^16.4.7"
+    },
+    "devDependencies": {
+        "tsx": "^4.19.2",
+        "typescript": "^5.0.0"
+    }
+}
