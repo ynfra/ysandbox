@@ -1,0 +1,18 @@
+---
+services:
+  webtop:
+    image: lscr.io/linuxserver/webtop:latest
+    restart: unless-stopped
+    shm_size: "1gb"
+    ports:
+      - 3000:3000
+      - 3001:3001
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SUBFOLDER=/
+      - TITLE=Ynfra
+    volumes:
+      - .docker/config:/config
+      # - /var/run/docker.sock:/var/run/docker.sock #optional
