@@ -1,0 +1,18 @@
+services:
+  chrome:
+    image: lscr.io/linuxserver/chrome:latest
+    platform: linux/amd64
+    restart: unless-stopped
+    shm_size: "1gb"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Prague
+      - CHROME_CLI=--load-extension=/config/extensions/chrome-mcp https://google.com
+    volumes:
+      - .docker/config:/config
+      - ./extensions:/config/extensions
+    ports:
+      - "3000:3000"   # HTTP (proxy this)
+      - "3001:3001"   # HTTPS (primary)
+      - "12306:12306" # MCP: chrome-mcp
