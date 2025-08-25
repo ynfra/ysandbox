@@ -1,0 +1,50 @@
+services:
+  metabase1:
+    image: metabase/metabase:v0.56.x
+    ports:
+      - 3001:3000
+    environment:
+      MB_DB_HOST: postgres1
+      MB_DB_PORT: 5432
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase1
+      MB_DB_USER: metabase1
+      MB_DB_PASS: metabase1
+    healthcheck:
+      test: curl --fail -I http://localhost:3000/api/health || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 5
+  postgres1:
+    image: postgres:17
+    volumes:
+      - .docker/postgres1:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: metabase1
+      POSTGRES_DB: metabase1
+      POSTGRES_PASSWORD: metabase1
+
+  metabase2:
+    image: metabase/metabase:v0.56.x
+    ports:
+      - 3002:3000
+    environment:
+      MB_DB_HOST: postgres2
+      MB_DB_PORT: 5432
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase2
+      MB_DB_USER: metabase2
+      MB_DB_PASS: metabase2
+    healthcheck:
+      test: curl --fail -I http://localhost:3000/api/health || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 5
+  postgres2:
+    image: postgres:17
+    volumes:
+      - .docker/postgres2:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: metabase2
+      POSTGRES_DB: metabase2
+      POSTGRES_PASSWORD: metabase2
