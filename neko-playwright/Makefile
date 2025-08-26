@@ -15,6 +15,6 @@ test-ui:
 report:
 	npx playwright show-report
 
-.PHONY: docker
+.PHONY: docker-up
 docker-up:
 	docker compose up
