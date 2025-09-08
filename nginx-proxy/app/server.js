@@ -3,9 +3,10 @@ const server = Bun.serve({
     fetch(request) {
         return new Response(
             JSON.stringify({
+                hostname: process.env.SERVICE_NAME || 'unknown',
                 url: request.url,
-                headers: request.headers,
                 method: request.method,
+                headers: request.headers,
             }),
             { headers: { "Content-Type": "application/json" } }
         );
