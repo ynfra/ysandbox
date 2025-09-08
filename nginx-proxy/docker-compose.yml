@@ -6,10 +6,22 @@ services:
     ports:
       - 8080:80
 
-  app:
+  app1:
     image: oven/bun:latest
     command: ["bun", "/app/server.js"]
     volumes:
       - ./app/server.js:/app/server.js
+    environment:
+      - SERVICE_NAME=app1
     ports:
-      - 3000:3000
+      - 3001:3000
+
+  app2:
+    image: oven/bun:latest
+    command: ["bun", "/app/server.js"]
+    volumes:
+      - ./app/server.js:/app/server.js
+    environment:
+      - SERVICE_NAME=app2
+    ports:
+      - 3002:3000
