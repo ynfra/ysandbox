@@ -2,14 +2,26 @@
 
 Examples of ynfrastructure.
 
+- [ysandbox/anythingllm](./anythingllm) - AnythingLLM document-aware AI chat with RAG.
+- [ysandbox/browserless](./browserless) - Headless Chromium API for browser automation, screenshots, and PDF generation.
+- [ysandbox/changedetection](./changedetection) - ChangeDetection.io website change monitoring and notifications.
 - [ysandbox/chromium-browser](./chromium-browser) - LinuxServer Chrome browser with MCP extensions support.
+- [ysandbox/crawl4ai](./crawl4ai) - AI-powered web crawler with structured data extraction.
+- [ysandbox/docling](./docling) - Document conversion service (PDF/DOCX to Markdown/JSON).
+- [ysandbox/docproc](./docproc) - Bundled document processing stack (Docling, PaddleOCR, Browserless, Thumbor).
+- [ysandbox/firecrawl](./firecrawl) - Web scraping and crawling API with browser automation and job queues.
 - [ysandbox/franken](./franken) - FrankenPHP server with Caddy.
+- [ysandbox/gotenberg](./gotenberg) - HTML, Office, and document to PDF conversion API.
 - [ysandbox/grafana-stack](./grafana-stack) - Grafana, Prometheus, MinIO, Mimir, Nginx monitoring stack.
 - [ysandbox/haproxy-consul](./haproxy-consul) - HAProxy with Consul service discovery.
+- [ysandbox/healthchecks](./healthchecks) - Healthchecks.io cron job and uptime monitoring.
 - [ysandbox/iconify-swr](./iconify-swr) - Nginx + App (Iconify) with proxy cache and stale-while-revalidate (SWR).
 - [ysandbox/kasm-chromium](./kasm-chromium) - Kasm Workspaces Chromium browser with VNC web access.
+- [ysandbox/librechat](./librechat) - Multi-model AI chat platform with MongoDB and Meilisearch.
 - [ysandbox/litellm-proxy](./litellm-proxy) - LiteLLM proxy with PostgreSQL and Prometheus monitoring.
+- [ysandbox/lobechat](./lobechat) - LobeChat client-side AI chat UI for multiple LLM providers.
 - [ysandbox/metabase-multi](./metabase-multi) - Dual Metabase instances with separate PostgreSQL databases.
+- [ysandbox/minio](./minio) - MinIO S3-compatible object storage with web console.
 - [ysandbox/n8n](./n8n) - n8n workflow automation with PostgreSQL, Redis, and Qdrant.
 - [ysandbox/neko-browser](./neko-browser) - Neko browser streaming with virtual display.
 - [ysandbox/neko-playwright](./neko-playwright) - Neko + Playwright browser automation.
@@ -17,8 +29,19 @@ Examples of ynfrastructure.
 - [ysandbox/nginx-php](./nginx-php) - Nginx + PHP-FPM setup.
 - [ysandbox/nginx-proxy](./nginx-proxy) - Nginx + App (Bun.js) with proxy pass.
 - [ysandbox/nginx-swr](./nginx-swr) - Nginx + App (Bun.js) with proxy cache and stale-while-revalidate (SWR).
+- [ysandbox/open-interpreter](./open-interpreter) - Code-executing AI agent via WebSocket and HTTP API.
+- [ysandbox/openwebui](./openwebui) - Open WebUI chat interface for multiple LLM providers.
+- [ysandbox/paddleocr](./paddleocr) - PaddleOCR REST API service supporting 80+ languages.
+- [ysandbox/pandoc](./pandoc) - Pandoc universal document format converter (Markdown, DOCX, EPUB, HTML, LaTeX).
+- [ysandbox/paperless](./paperless) - Paperless-NGX document management with OCR, bundled with Tika and Gotenberg.
+- [ysandbox/qdrant](./qdrant) - Qdrant high-performance vector database for AI applications.
+- [ysandbox/searxng](./searxng) - SearXNG self-hosted meta-search engine with JSON API.
 - [ysandbox/skyvern](./skyvern) - Skyvern AI-powered browser automation platform with PostgreSQL.
 - [ysandbox/squid](./squid) - Squid proxy server.
+- [ysandbox/stirling-pdf](./stirling-pdf) - Stirling-PDF toolkit for merging, splitting, OCR, and converting PDFs.
+- [ysandbox/supabase](./supabase) - Self-hosted Supabase backend platform (PostgreSQL, Auth, Storage, Realtime, Edge Functions).
 - [ysandbox/terraform-r2](./terraform-r2) - Terraform configuration for Cloudflare R2 storage.
+- [ysandbox/thumbor](./thumbor) - Thumbor on-demand image processing and resizing server.
+- [ysandbox/tika](./tika) - Apache Tika content detection and extraction (1000+ file formats).
 - [ysandbox/webtop-browser](./webtop-browser) - LinuxServer web-accessible Linux desktop environment.
 - [ysandbox/windmill](./windmill) - Windmill workflow engine with Caddy.
