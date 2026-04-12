@@ -1,0 +1,20 @@
+services:
+  crawl4ai:
+    image: unclecode/crawl4ai:latest
+    restart: unless-stopped
+    ports:
+      - "11235:11235"
+    volumes:
+      - /dev/shm:/dev/shm
+    shm_size: "1g"
+    mem_limit: 4g
+    mem_reservation: 1g
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11235/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
