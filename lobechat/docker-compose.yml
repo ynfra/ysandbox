@@ -1,0 +1,11 @@
+services:
+  lobechat:
+    image: lobehub/lobe-chat:latest
+    restart: unless-stopped
+    ports:
+      - "3210:3210"
+    # environment:
+    #   OPENAI_API_KEY: sk-...
+    #   OPENAI_PROXY_URL: https://api.openai.com/v1
+    #   ANTHROPIC_API_KEY: sk-ant-...
+    #   ACCESS_CODE: your_password_here
