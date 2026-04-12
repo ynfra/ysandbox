@@ -1,0 +1,13 @@
+services:
+  anythingllm:
+    image: mintplexlabs/anythingllm:latest
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    cap_add:
+      - SYS_ADMIN
+    volumes:
+      - ./.docker/storage:/app/server/storage
+      - ./.env:/app/server/.env
+    env_file:
+      - .env
