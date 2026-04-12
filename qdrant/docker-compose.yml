@@ -1,0 +1,11 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./.docker/storage:/qdrant/storage
+    # environment:
+    #   QDRANT__SERVICE__API_KEY: your_api_key_here
