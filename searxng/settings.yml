@@ -1,0 +1,21 @@
+use_default_settings: true
+
+server:
+  secret_key: "893f4331cbb4d8e4ada1e55d6e448a5b9a2113836ea938c2a11b27c9178a84cb"
+  bind_address: "0.0.0.0:8080"
+  image_proxy: true
+  method: "GET"
+
+ui:
+  static_use_hash: true
+  default_theme: simple
+  theme_args:
+    simple_style: dark
+
+search:
+  safe_search: 0
+  autocomplete: ""
+  default_lang: "auto"
+  formats:
+    - html
+    - json
