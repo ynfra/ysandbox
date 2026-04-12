@@ -1,0 +1,10 @@
+services:
+  browserless:
+    image: ghcr.io/browserless/chromium:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      CONCURRENT: 3
+      TIMEOUT: 30000
+      # BROWSERLESS_TOKEN: your_token_here
