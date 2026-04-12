@@ -1,0 +1,12 @@
+services:
+  changedetection:
+    image: ghcr.io/dgtlmoon/changedetection.io:latest
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./.docker/datastore:/datastore
+    # environment:
+    #   PLAYWRIGHT_DRIVER_URL: ws://host.docker.internal:3000
+    #   PASSWORD: your_password_here
+    #   BASE_URL: http://localhost:5000
