@@ -1,0 +1,6 @@
+services:
+  yellowlabtools:
+    image: ousamabenyounes/yellowlabtools:latest
+    restart: unless-stopped
+    ports:
+      - "8383:8383"

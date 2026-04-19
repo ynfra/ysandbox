@@ -1,0 +1,12 @@
+services:
+  openserp:
+    image: karust/openserp:latest
+    restart: unless-stopped
+    command: serve -a 0.0.0.0 -p 7000
+    ports:
+      - "7000:7000"
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://127.0.0.1:7000/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3

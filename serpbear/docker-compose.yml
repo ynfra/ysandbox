@@ -1,0 +1,20 @@
+services:
+  serpbear:
+    image: towfiqi/serpbear:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./.docker/data:/app/data
+    environment:
+      USER_NAME: admin
+      PASSWORD: admin
+      SECRET: serpbear-secret-key-change-me
+      APIKEY: serpbear-api-key-change-me
+      SESSION_DURATION: "24"
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
