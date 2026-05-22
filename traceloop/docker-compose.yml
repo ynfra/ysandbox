@@ -1,0 +1,34 @@
+services:
+  hub:
+    image: traceloop/hub
+    restart: unless-stopped
+    ports:
+      - "3030:3000"
+      - "8088:8080"
+    environment:
+      HUB_MODE: ${HUB_MODE:-database}
+      DATABASE_URL: postgresql://hub:${POSTGRES_PASSWORD:-hub}@db:5432/hub
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hub
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hub}
+      POSTGRES_DB: hub
+    volumes:
+      - .docker/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hub"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
