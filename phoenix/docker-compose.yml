@@ -1,0 +1,38 @@
+services:
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    restart: unless-stopped
+    ports:
+      - "6006:6006"
+      - "4317:4317"
+    environment:
+      PHOENIX_SQL_DATABASE_URL: postgresql://phoenix:${POSTGRES_PASSWORD:-phoenix}@db:5432/phoenix
+      PHOENIX_WORKING_DIR: /mnt/data
+      PHOENIX_TELEMETRY_ENABLED: ${PHOENIX_TELEMETRY_ENABLED:-false}
+      PHOENIX_DEFAULT_ADMIN_INITIAL_PASSWORD: ${PHOENIX_ADMIN_PASSWORD:-admin}
+    volumes:
+      - .docker/phoenix:/mnt/data
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6006/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: phoenix
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-phoenix}
+      POSTGRES_DB: phoenix
+    volumes:
+      - .docker/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U phoenix"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
