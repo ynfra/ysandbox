@@ -1,6 +1,13 @@
 # ysandbox — Agent Reference
 
-Self-contained Docker Compose stacks demonstrating ynfrastructure patterns. Each subdirectory is an independent, runnable example.
+**Local reference library.** Self-contained Docker Compose stacks for local
+prototyping and experimentation. Each subdirectory is an independent,
+copy-pasteable example — they do not share networks or depend on each other.
+Port numbers are not globally unique across stacks; do not run two stacks with
+the same host port simultaneously.
+
+Once a service is proven here and needed in production, promote it to `ydocker/`
+which manages the actual server deployment.
 
 ---
 
