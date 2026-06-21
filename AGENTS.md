@@ -128,7 +128,7 @@ Named Docker volumes (e.g. `db-config`, `deno-cache` in `supabase`) are managed 
 | `webtop-browser` | `lscr.io/linuxserver/webtop:latest` | 3000 | Web-accessible Linux desktop environment |
 | `windmill` | `ghcr.io/windmill-labs/windmill` (via `$WM_IMAGE`) + Caddy + PostgreSQL | 8000 | Workflow engine with Caddy reverse proxy |
 | `yellowlabtools` | `ousamabenyounes/yellowlabtools:latest` | 8383 | Web page performance and front-end quality analysis |
-| `yide` | `lscr.io/linuxserver/code-server:latest` | 8443 | VS Code in the browser (code-server), single-user self-hosted IDE |
+| `yide` | `codercom/code-server`, `lscr.io/linuxserver/code-server`, `lscr.io/linuxserver/openvscode-server`, `theiaide/theia` | 3010–3040 | Four in-browser IDE variants; use `yide.sh <variant>` to spin up a chosen one |
 | `youtube-downloader` | `ghcr.io/kieraneglin/pinchflat:latest` + `ghcr.io/alexta69/metube` | 8945 (Pinchflat), 8081 (MeTube) | YouTube media downloader (Pinchflat + MeTube) |
 
 ---
