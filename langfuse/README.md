@@ -1,5 +1,7 @@
 # Langfuse
 
+![langfuse](docs/dashboard.png)
+
 Open-source LLM engineering platform — tracing, evals, prompt versioning, datasets, cost tracking, and playground. The most complete self-hostable LangSmith alternative (27k ⭐, MIT license). Pairs naturally with the litellm-proxy stack already in ysandbox.
 
 ## Services
