@@ -1,5 +1,7 @@
 # mcpo
 
+![mcpo](docs/dashboard.png)
+
 MCP-to-OpenAPI proxy by Open WebUI. Wraps one or more MCP (Model Context
 Protocol) servers and exposes their tools as standard OpenAPI/REST HTTP
 endpoints, auto-generating interactive OpenAPI docs. This stack wraps the
@@ -60,6 +62,42 @@ curl -X POST http://localhost:8000/time/get_current_time \
     -H "Content-Type: application/json" \
     -d '{"timezone": "Europe/Prague"}'
 ```
+
+## Running
+
+```bash
+docker compose up -d
+```
+
+Interactive Swagger UI: http://localhost:8000/docs (the UI itself loads
+without auth). The wrapped `time` MCP server is exposed under its own route
+at http://localhost:8000/time with schema at http://localhost:8000/time/docs.
+
+All **tool calls** require the API key as a bearer token
+(`--api-key`, default `top-secret`, override via `MCPO_API_KEY` in `.env`):
+
+```bash
+curl -X POST http://localhost:8000/time/get_current_time \
+    -H "Authorization: Bearer top-secret" \
+    -H "Content-Type: application/json" \
+    -d '{"timezone": "Europe/Prague"}'
+```
+
+## Notes
+
+- **Wrapped MCP server:** `mcp-server-time` (launched via `uvx` from
+  `config.json`), exposing a `time` tool as OpenAPI/REST.
+- **First boot needs outbound internet.** mcpo runs the wrapped server via
+  `uvx`/`npx` at container **start**, so the first boot downloads the
+  `mcp-server-time` package (a few seconds). Watch progress with
+  `docker compose logs -f`; the UI returns 200 on `/docs` once
+  "Application startup complete" appears.
+- **Port 8000 clash:** several ysandbox stacks publish host port 8000. To run
+  mcpo alongside another such stack, add a gitignored
+  `docker-compose.override.yml` remapping the port with `ports: !override`
+  (never committed).
+- The root `/docs` page lists available tools; per-tool operations render on
+  each tool's own `/docs` sub-route (e.g. `/time/docs`).
 
 ## Links
 
