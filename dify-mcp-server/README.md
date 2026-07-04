@@ -1,5 +1,7 @@
 # Dify MCP Server
 
+![dify-mcp-server](docs/dashboard.png)
+
 MCP server that wraps [Dify](https://github.com/langgenius/dify) workflow apps
 and exposes each configured Dify app as an MCP tool, so any MCP client can
 invoke Dify workflows.
@@ -79,6 +81,48 @@ default `config.yaml` ships with an **empty** `dify_app_sks: []`, letting the
 stack start cleanly with zero tools for local sandbox verification. To expose
 real tools, supply at least one valid key pointing at a reachable Dify
 instance.
+
+## Running
+
+```bash
+docker compose up -d          # or: make docker-up
+```
+
+Then open the interactive Swagger UI at http://localhost:8000/docs. The page
+renders **"MCP OpenAPI Proxy — Swagger UI"** with the wrapped `dify` server
+listed as an available tool sub-route (schema at
+http://localhost:8000/dify/docs). Bring the stack down with `docker compose down`.
+
+Every request to `mcpo` needs the bearer token (`--api-key`, default
+`top-secret`, override via `MCPO_API_KEY` in `.env`):
+
+```bash
+curl -H "Authorization: Bearer top-secret" http://localhost:8000/dify/docs
+```
+
+The `/docs` landing page itself is unauthenticated and renders without a key.
+
+## Notes
+
+- **First boot needs outbound internet.** `mcpo` launches the stdio
+  `dify_mcp_server` via `uvx --from git+https://github.com/YanxingLiu/dify-mcp-server`
+  at container **start** — on first run it clones + builds the package from
+  GitHub (a few seconds, ~37 packages) before the tool routes appear. Watch
+  progress with `docker compose logs -f`; wait for
+  `Application startup complete` / `Uvicorn running on http://0.0.0.0:8000`.
+- **How the Dify workflow is wired.** The connection lives in `config.yaml`
+  (mounted read-only, pointed at by `CONFIG_PATH=/app/config.yaml` in
+  `config.json`): `dify_base_url` (e.g. `https://cloud.dify.ai/v1` or your
+  self-hosted `.../v1`) plus `dify_app_sks` — a list of Dify **App Secret Keys**
+  (`app-xxxxxxxx`), one per workflow app, each surfaced as one MCP tool.
+- **Empty key list boots clean with zero tools.** `dify_mcp_server` calls
+  `<dify_base_url>/info` for every SK at startup, so an invalid/unreachable key
+  crashes the server on launch. The default `config.yaml` ships
+  `dify_app_sks: []` so the stack starts cleanly for sandbox verification; the
+  Swagger UI then shows the `dify` sub-route with "No operations defined in
+  spec!" until real keys are supplied.
+- The `mcpo` image is Python-based, so the healthcheck uses `python -c` +
+  `urllib` (no `curl`/`wget` in the image) to probe `/docs`.
 
 ## Links
 
