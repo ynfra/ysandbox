@@ -20,3 +20,4 @@ services:
             NEKO_WEBRTC_ICELITE: 1
             NEKO_DESKTOP_UNMINIMIZE: true
             NEKO_DESKTOP_UPLOAD_DROP: true
+            NEKO_CHROME_FLAGS: ""
