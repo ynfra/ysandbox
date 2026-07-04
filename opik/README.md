@@ -1,5 +1,7 @@
 # Comet Opik
 
+![opik](docs/dashboard.png)
+
 Open-source LLM observability and evaluation platform — tracing, experiments, prompt versioning, LLM-as-judge evals, and CI/CD integration. Apache-2.0 licensed.
 
 ## Services
