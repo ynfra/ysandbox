@@ -4,6 +4,20 @@
 
 S3-compatible object storage server. Drop-in replacement for Amazon S3 with a web console for bucket management.
 
+## Running
+
+```bash
+docker compose up -d
+```
+
+- Web **Console**: [`http://localhost:9001`](http://localhost:9001) — log in
+  with `minioadmin` / `minioadmin` (from `MINIO_ROOT_USER` /
+  `MINIO_ROOT_PASSWORD` in `docker-compose.yml`).
+- **S3 API** endpoint: [`http://localhost:9000`](http://localhost:9000) — use
+  with `mc`, the AWS SDKs, or any S3 client.
+- After logging in, use **Object Browser** / **Buckets** to create a bucket
+  and upload objects. Data persists in `.docker/data/`.
+
 ## Services
 
 - **minio**: MinIO object storage server
