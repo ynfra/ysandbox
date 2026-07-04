@@ -1,5 +1,7 @@
 # Nginx + SWR
 
+![nginx-swr](docs/dashboard.png)
+
 - Nginx on [`http://localhost:8080`](http://localhost:8080)
 - App on [`http://localhost:3000`](http://localhost:3000)
 
