@@ -1,5 +1,7 @@
 # AnythingLLM
 
+![anythingllm](docs/dashboard.png)
+
 Document-aware AI chat with RAG (Retrieval-Augmented Generation). Upload documents, create workspaces, and chat with your data using any LLM provider.
 
 ## Services
