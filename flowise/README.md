@@ -24,6 +24,26 @@ make docker-up
 
 Open http://localhost:3000 and sign in with the basic-auth credentials below.
 
+## Running
+
+```bash
+docker compose up -d
+```
+
+- **UI + API:** http://localhost:3000
+
+Flowise 3.x presents an **account screen** on first run — register / sign in as
+the admin, then you land on the Chatflows / Agentflows dashboard and build flows
+from the node canvas. The `FLOWISE_USERNAME` / `FLOWISE_PASSWORD`
+(`admin` / `admin`) in `.env` seed those credentials.
+
+## Notes
+
+- The entrypoint runs `sleep 3; flowise start`, adding a small startup delay;
+  the healthcheck polls `/api/v1/ping` until the app is ready.
+- All state (flows, credentials, API keys, SQLite DB) persists to
+  `.docker/flowise/` — delete it to reset.
+
 ## Configuration
 
 Environment variables in `.env`:
