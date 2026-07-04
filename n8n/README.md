@@ -1,5 +1,7 @@
 # n8n
 
+![n8n](docs/dashboard.png)
+
 n8n is a powerful workflow automation tool that enables you to connect various applications and services together to create complex automation workflows.
 
 ## Services
