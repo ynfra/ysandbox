@@ -2,13 +2,16 @@ x-api-env: &api-env
   AGENTA_LICENSE: oss
   AGENTA_AUTH_KEY: ${AGENTA_AUTH_KEY:-changeme-auth-key-32-chars-minimum}
   AGENTA_CRYPT_KEY: ${AGENTA_CRYPT_KEY:-changeme-crypt-key-32-chars-min}
-  DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-agenta}:${POSTGRES_PASSWORD:-agenta}@postgres:5432/agenta
-  REDIS_URL: redis://redis-volatile:6379/0
-  CELERY_BROKER_URL: redis://redis-volatile:6379/1
-  CELERY_RESULT_BACKEND: redis://redis-durable:6379/0
+  POSTGRES_USER: ${POSTGRES_USER:-agenta}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agenta}
+  POSTGRES_URI_CORE: postgresql+asyncpg://${POSTGRES_USER:-agenta}:${POSTGRES_PASSWORD:-agenta}@postgres:5432/agenta_oss_core
+  POSTGRES_URI_TRACING: postgresql+asyncpg://${POSTGRES_USER:-agenta}:${POSTGRES_PASSWORD:-agenta}@postgres:5432/agenta_oss_tracing
+  POSTGRES_URI_SUPERTOKENS: postgresql://${POSTGRES_USER:-agenta}:${POSTGRES_PASSWORD:-agenta}@postgres:5432/agenta_oss_supertokens
+  REDIS_URI_VOLATILE: redis://redis-volatile:6379/0
+  REDIS_URI_DURABLE: redis://redis-durable:6379/0
   SUPERTOKENS_CONNECTION_URI: http://supertokens:3567
-  AGENTA_API_URL: http://traefik:80/api
-  AGENTA_SERVICES_URL: http://traefik:80/services
+  AGENTA_API_URL: http://localhost:${AGENTA_PORT:-8081}/api
+  AGENTA_SERVICES_URL: http://localhost:${AGENTA_PORT:-8081}/services
   AGENTA_WEB_URL: http://localhost:${AGENTA_PORT:-8081}
 
 services:
@@ -36,21 +39,37 @@ services:
       - "traefik.http.routers.web.priority=1"
       - "traefik.http.services.web.loadbalancer.server.port=3000"
     environment:
-      NEXT_PUBLIC_AGENTA_API_URL: http://localhost:${AGENTA_PORT:-8081}
+      AGENTA_LICENSE: oss
+      AGENTA_WEB_URL: http://localhost:${AGENTA_PORT:-8081}
+      AGENTA_API_URL: http://localhost:${AGENTA_PORT:-8081}/api
     depends_on:
       - api
 
   api:
     image: ghcr.io/agenta-ai/agenta-api:${AGENTA_API_IMAGE_TAG:-latest}
     restart: unless-stopped
+    command: >
+      gunicorn entrypoints.routers:app
+      --bind 0.0.0.0:8000
+      --worker-class uvicorn.workers.UvicornWorker
+      --workers 2
+      --timeout 60
+      --graceful-timeout 30
+      --access-logfile -
+      --error-logfile -
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=PathPrefix(`/api`)"
       - "traefik.http.routers.api.priority=10"
+      - "traefik.http.middlewares.api-strip.stripprefix.prefixes=/api"
+      - "traefik.http.middlewares.api-strip.stripprefix.forceslash=true"
+      - "traefik.http.routers.api.middlewares=api-strip"
       - "traefik.http.services.api.loadbalancer.server.port=8000"
     environment:
       <<: *api-env
       SCRIPT_NAME: /api
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy
@@ -74,7 +93,7 @@ services:
   worker-evaluations:
     image: ghcr.io/agenta-ai/agenta-api:${AGENTA_API_IMAGE_TAG:-latest}
     restart: unless-stopped
-    command: python -m oss.entrypoints.worker_evaluations
+    command: python -m entrypoints.worker_evaluations
     environment:
       <<: *api-env
     depends_on:
@@ -84,7 +103,7 @@ services:
   worker-tracing:
     image: ghcr.io/agenta-ai/agenta-api:${AGENTA_API_IMAGE_TAG:-latest}
     restart: unless-stopped
-    command: python -m oss.entrypoints.worker_tracing
+    command: python -m entrypoints.worker_tracing
     environment:
       <<: *api-env
     depends_on:
@@ -94,7 +113,7 @@ services:
   worker-webhooks:
     image: ghcr.io/agenta-ai/agenta-api:${AGENTA_API_IMAGE_TAG:-latest}
     restart: unless-stopped
-    command: python -m oss.entrypoints.worker_webhooks
+    command: python -m entrypoints.worker_webhooks
     environment:
       <<: *api-env
     depends_on:
@@ -104,7 +123,7 @@ services:
   worker-events:
     image: ghcr.io/agenta-ai/agenta-api:${AGENTA_API_IMAGE_TAG:-latest}
     restart: unless-stopped
-    command: python -m oss.entrypoints.worker_events
+    command: python -m entrypoints.worker_events
     environment:
       <<: *api-env
     depends_on:
@@ -123,26 +142,42 @@ services:
   services:
     image: ghcr.io/agenta-ai/agenta-services:${AGENTA_SERVICES_IMAGE_TAG:-latest}
     restart: unless-stopped
+    command: >
+      gunicorn entrypoints.main:app
+      --bind 0.0.0.0:8080
+      --worker-class uvicorn.workers.UvicornWorker
+      --workers 2
+      --timeout 60
+      --graceful-timeout 60
+      --access-logfile -
+      --error-logfile -
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.services.rule=PathPrefix(`/services`)"
       - "traefik.http.routers.services.priority=10"
+      - "traefik.http.middlewares.services-strip.stripprefix.prefixes=/services"
+      - "traefik.http.middlewares.services-strip.stripprefix.forceslash=true"
+      - "traefik.http.routers.services.middlewares=services-strip"
       - "traefik.http.services.services.loadbalancer.server.port=8080"
     environment:
+      <<: *api-env
       SCRIPT_NAME: /services
-      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-agenta}:${POSTGRES_PASSWORD:-agenta}@postgres:5432/agenta
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       alembic:
         condition: service_completed_successfully
 
   supertokens:
-    image: registry.supertokens.io/supertokens/supertokens-postgresql
+    image: supertokens/supertokens-postgresql:11
     restart: unless-stopped
     environment:
-      POSTGRESQL_CONNECTION_URI: postgresql://${POSTGRES_USER:-agenta}:${POSTGRES_PASSWORD:-agenta}@postgres:5432/supertokens
+      POSTGRESQL_CONNECTION_URI: postgresql://${POSTGRES_USER:-agenta}:${POSTGRES_PASSWORD:-agenta}@postgres:5432/agenta_oss_supertokens
     depends_on:
       postgres:
         condition: service_healthy
+      alembic:
+        condition: service_completed_successfully
 
   postgres:
     image: postgres:17
@@ -150,15 +185,14 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-agenta}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agenta}
-      POSTGRES_DB: agenta
     volumes:
       - .docker/postgres:/var/lib/postgresql/data
-      - ./init/init.sh:/docker-entrypoint-initdb.d/init.sh
+      - ./init/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-agenta}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-agenta} -d agenta_oss_core"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   redis-volatile:
     image: redis:8
