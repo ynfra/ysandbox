@@ -1,5 +1,7 @@
 # Nginx + Proxy
 
+![nginx-proxy](docs/dashboard.png)
+
 - Nginx on [`http://localhost:8080`](http://localhost:8080)
 - App1 on [`http://localhost:3001`](http://localhost:3001)
 - App2 on [`http://localhost:3002`](http://localhost:3002)
