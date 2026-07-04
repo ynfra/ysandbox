@@ -35,6 +35,26 @@ Open http://localhost:3000
 > openssl rand -hex 32
 > ```
 
+## Running
+
+```bash
+docker compose up -d
+```
+
+- **Dashboard:** http://localhost:3000
+- **Jawn proxy:** http://localhost:8585 (use as your OpenAI / Anthropic base URL)
+
+Sign in with the seeded account **`test@helicone.ai` / `password`** (the
+all-in-one image skips email confirmation), or register a new account, then run
+through the org / onboarding steps to reach the analytics dashboard.
+
+## Notes
+
+- Large all-in-one image (Postgres + ClickHouse + MinIO + Redis in one
+  container) — **first boot is slow**; the healthcheck allows a 60s start period
+  before the dashboard responds.
+- All datastores persist under `.docker/` (`postgres/`, `clickhouse/`, `minio/`).
+
 ## Using the Proxy
 
 Replace your OpenAI base URL with the Helicone proxy endpoint:
