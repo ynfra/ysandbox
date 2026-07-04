@@ -1,5 +1,7 @@
 # SearXNG
 
+![searxng](docs/dashboard.png)
+
 Self-hosted meta-search engine that aggregates results from 70+ search engines. Provides both a web UI and a JSON API.
 
 ## Services
