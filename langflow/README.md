@@ -30,6 +30,27 @@ make docker-up
 Open http://localhost:7860 — the flow editor loads once DB migrations finish
 (first start takes a bit longer while the image initializes the database).
 
+## Running
+
+```bash
+docker compose up -d
+```
+
+- **Flow editor + API:** http://localhost:7860
+
+With this stack's defaults **no login is required** — `LANGFLOW_AUTO_LOGIN` is
+left unset (auto-login on), so the flow editor opens directly. First start takes
+a little longer while Postgres migrations run. Build flows on the canvas; each
+project also exposes them as MCP tools (see below).
+
+## Notes
+
+- To require authentication, uncomment `LANGFLOW_AUTO_LOGIN=false` plus
+  `LANGFLOW_SUPERUSER` / `LANGFLOW_SUPERUSER_PASSWORD` (and a
+  `LANGFLOW_SECRET_KEY`) in `.env`, then log in with those credentials.
+- Flows, users, and secrets live in Postgres (`.docker/postgres/`); config and
+  file storage in `.docker/langflow/`.
+
 ## Configuration
 
 Key environment variables in `.env`:
