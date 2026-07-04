@@ -1,5 +1,7 @@
 # HAProxy with Consul Service Discovery
 
+![haproxy-consul](docs/dashboard.png)
+
 This example demonstrates HAProxy load balancing with Consul service discovery using Docker Compose and Registrator for automatic service registration.
 
 ## Services
@@ -9,12 +11,24 @@ This example demonstrates HAProxy load balancing with Consul service discovery u
 - **App**: Sample Bun.js application (3 replicas) running on port 3000
 - **Registrator**: Automatic service registration for Docker containers
 
-## Usage
+## Running
 
 Start all services:
 ```bash
 docker compose up -d
 ```
+
+- **Consul UI**: http://localhost:8500/ui — Services list shows `consul` (1 instance) plus `app` (3 instances registered by Registrator via the Docker socket).
+- **Application (via HAProxy)**: http://localhost:8080 — round-robins across the three app replicas.
+- **HAProxy stats**: http://localhost:8404/stats — note this is on port **8404**, not 8080.
+
+Bring the stack down with `docker compose down`.
+
+## Notes
+
+- Boots cleanly on OrbStack (macOS) with `docker compose up -d`; no changes needed to the tracked config. Consul UI is reachable within ~10s.
+- Registrator uses the `-internal` flag, so it registers each container's internal `:3000` port with Consul; HAProxy resolves the `_app._tcp.service.consul` SRV records through Consul's DNS (port 8600) and populates its `server-template` backend dynamically.
+- Consul runs in `-dev` mode — state is ephemeral and not persisted between runs.
 
 ## Access Points
 
