@@ -1,5 +1,7 @@
 # Qdrant
 
+![qdrant dashboard](docs/dashboard.png)
+
 High-performance vector database for similarity search and AI applications. Supports filtering, payload storage, and distributed deployment.
 
 ## Services
