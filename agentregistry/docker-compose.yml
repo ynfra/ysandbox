@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-agentregistry}
+      POSTGRES_USER: ${POSTGRES_USER:-agentregistry}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agentregistry}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - .docker/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-agentregistry} -d ${POSTGRES_DB:-agentregistry}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  agentregistry:
+    image: ${DOCKER_REGISTRY:-ghcr.io}/agentregistry-dev/agentregistry/server:${VERSION:-v0.3.3}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AGENT_REGISTRY_DATABASE_URL: "postgres://${POSTGRES_USER:-agentregistry}:${POSTGRES_PASSWORD:-agentregistry}@postgres:5432/${POSTGRES_DB:-agentregistry}?sslmode=disable"
+      AGENT_REGISTRY_SERVER_ADDRESS: ":8080"
+      AGENT_REGISTRY_AGENT_GATEWAY_PORT: "21212"
+      AGENT_REGISTRY_JWT_PRIVATE_KEY: ${AGENT_REGISTRY_JWT_PRIVATE_KEY:-0000000000000000000000000000000000000000000000000000000000000000}
+      AGENT_REGISTRY_ENABLE_REGISTRY_VALIDATION: "false"
+      AGENT_REGISTRY_PLATFORM_MODE: "docker"
+      AGENT_REGISTRY_MCP_PORT: "31313"
+    ports:
+      - "12121:8080"
+      - "31313:31313"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # Mount the Docker socket so the registry can launch MCP/agent containers on the host.
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mount /tmp so the registry can write configs accessible to Docker on the host.
+      - /tmp:/tmp
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

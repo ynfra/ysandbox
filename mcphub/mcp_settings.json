@@ -1,0 +1,117 @@
+{
+  "mcpServers": {
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ]
+    }
+  },
+  "systemConfig": {
+    "oauthServer": {
+      "enabled": true,
+      "accessTokenLifetime": 3600,
+      "refreshTokenLifetime": 1209600,
+      "authorizationCodeLifetime": 300,
+      "requireClientSecret": false,
+      "allowedScopes": [
+        "read",
+        "write"
+      ],
+      "requireState": false,
+      "dynamicRegistration": {
+        "enabled": true,
+        "allowedGrantTypes": [
+          "authorization_code",
+          "refresh_token"
+        ],
+        "requiresAuthentication": false
+      }
+    },
+    "smartRouting": {
+      "enabled": false,
+      "dbUrl": "",
+      "openaiApiBaseUrl": "",
+      "openaiApiKey": "",
+      "openaiApiEmbeddingModel": ""
+    },
+    "toolResultCompression": {
+      "enabled": false,
+      "minTokens": 2000,
+      "maxOutputTokens": 1200,
+      "strategy": "auto"
+    },
+    "routing": {
+      "enableGlobalRoute": true,
+      "enableGroupNameRoute": true,
+      "enableBearerAuth": false,
+      "bearerAuthKey": "",
+      "bearerAuthHeaderName": "Authorization",
+      "jsonBodyLimit": "1mb",
+      "skipAuth": false
+    },
+    "install": {
+      "pythonIndexUrl": "",
+      "npmRegistry": "",
+      "baseUrl": "http://localhost:3000"
+    },
+    "mcpRouter": {
+      "apiKey": "",
+      "referer": "https://www.mcphub.app",
+      "title": "MCPHub",
+      "baseUrl": "https://api.mcprouter.to/v1"
+    },
+    "auth": {
+      "betterAuth": {}
+    }
+  },
+  "users": [
+    {
+      "username": "admin",
+      "password": "$2b$10$AlZSLJmNd7hyuIkDSIPvCOVjl4MA4mJo8rUBLimuU7zX738E5E8yS",
+      "isAdmin": true
+    }
+  ],
+  "bearerKeys": [],
+  "groups": [
+    {
+      "id": "b79a7007-6236-4956-b731-bd7bf64e3a92",
+      "owner": "admin",
+      "name": "infra",
+      "description": "",
+      "servers": [
+        {
+          "name": "fetch",
+          "tools": "all",
+          "prompts": "all",
+          "resources": "all"
+        }
+      ]
+    },
+    {
+      "id": "da3d747a-805d-4d67-aeb2-1fc7b4f7771c",
+      "owner": "admin",
+      "name": "ops",
+      "description": "",
+      "servers": [
+        {
+          "name": "fetch",
+          "tools": [],
+          "prompts": [
+            "fetch"
+          ],
+          "resources": []
+        }
+      ]
+    }
+  ],
+  "prompts": [
+    {
+      "id": "96e385e7-7943-4482-b333-f20ae82e5d0d",
+      "enabled": true,
+      "name": "codereview",
+      "title": "Code Review",
+      "template": "So coll!"
+    }
+  ]
+}

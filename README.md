@@ -2,14 +2,18 @@
 
 Examples of ynfrastructure.
 
+- [ysandbox/agentregistry](./agentregistry) - Registry for MCP servers, agents, skills, and prompts (server + PostgreSQL).
 - [ysandbox/anythingllm](./anythingllm) - AnythingLLM document-aware AI chat with RAG.
 - [ysandbox/browserless](./browserless) - Headless Chromium API for browser automation, screenshots, and PDF generation.
 - [ysandbox/changedetection](./changedetection) - ChangeDetection.io website change monitoring and notifications.
 - [ysandbox/chromium-browser](./chromium-browser) - LinuxServer Chrome browser with MCP extensions support.
 - [ysandbox/crawl4ai](./crawl4ai) - AI-powered web crawler with structured data extraction.
+- [ysandbox/dify](./dify) - Visual LLM app/workflow builder; apps can be exposed as MCP servers.
+- [ysandbox/dify-mcp-server](./dify-mcp-server) - MCP wrapper for invoking Dify workflows (via mcpo).
 - [ysandbox/docling](./docling) - Document conversion service (PDF/DOCX to Markdown/JSON).
 - [ysandbox/docproc](./docproc) - Bundled document processing stack (Docling, PaddleOCR, Browserless, Thumbor).
 - [ysandbox/firecrawl](./firecrawl) - Web scraping and crawling API with browser automation and job queues.
+- [ysandbox/flowise](./flowise) - Visual drag-and-drop LLM agent/workflow builder with MCP integrations.
 - [ysandbox/franken](./franken) - FrankenPHP server with Caddy.
 - [ysandbox/gotenberg](./gotenberg) - HTML, Office, and document to PDF conversion API.
 - [ysandbox/grafana-stack](./grafana-stack) - Grafana, Prometheus, MinIO, Mimir, Nginx monitoring stack.
@@ -17,10 +21,18 @@ Examples of ynfrastructure.
 - [ysandbox/healthchecks](./healthchecks) - Healthchecks.io cron job and uptime monitoring.
 - [ysandbox/iconify-swr](./iconify-swr) - Nginx + App (Iconify) with proxy cache and stale-while-revalidate (SWR).
 - [ysandbox/kasm-chromium](./kasm-chromium) - Kasm Workspaces Chromium browser with VNC web access.
+- [ysandbox/langflow](./langflow) - Visual AI workflow builder; flows exposed as MCP tools (with PostgreSQL).
+- [ysandbox/langflow-mcp](./langflow-mcp) - MCP bridge exposing Langflow flows as MCP tools (via supergateway).
 - [ysandbox/librechat](./librechat) - Multi-model AI chat platform with MongoDB and Meilisearch.
 - [ysandbox/litellm-proxy](./litellm-proxy) - LiteLLM proxy with PostgreSQL and Prometheus monitoring.
 - [ysandbox/lobechat](./lobechat) - LobeChat client-side AI chat UI for multiple LLM providers.
+- [ysandbox/mcp-gateway-registry](./mcp-gateway-registry) - Governed control plane for MCP servers, agents, and skills.
+- [ysandbox/mcp-proxy](./mcp-proxy) - TBXark lightweight MCP proxy aggregating multiple MCP servers behind one HTTP server.
+- [ysandbox/mcphub](./mcphub) - Unified hub/gateway for multiple MCP servers with dashboard and Streamable HTTP/SSE.
+- [ysandbox/mcpjungle](./mcpjungle) - Self-hosted MCP gateway/registry — one endpoint for many MCP servers (with PostgreSQL).
+- [ysandbox/mcpo](./mcpo) - Expose MCP tools as OpenAPI/REST (by Open WebUI).
 - [ysandbox/metabase-multi](./metabase-multi) - Dual Metabase instances with separate PostgreSQL databases.
+- [ysandbox/metamcp](./metamcp) - MCP proxy/aggregator with middleware and namespaces (with PostgreSQL).
 - [ysandbox/minio](./minio) - MinIO S3-compatible object storage with web console.
 - [ysandbox/n8n](./n8n) - n8n workflow automation with PostgreSQL, Redis, and Qdrant.
 - [ysandbox/neko-browser](./neko-browser) - Neko browser streaming with virtual display.
@@ -34,12 +46,14 @@ Examples of ynfrastructure.
 - [ysandbox/paddleocr](./paddleocr) - PaddleOCR REST API service supporting 80+ languages.
 - [ysandbox/pandoc](./pandoc) - Pandoc universal document format converter (Markdown, DOCX, EPUB, HTML, LaTeX).
 - [ysandbox/paperless](./paperless) - Paperless-NGX document management with OCR, bundled with Tika and Gotenberg.
+- [ysandbox/promptregistry-mcp](./promptregistry-mcp) - Simple MCP prompt registry (via supergateway).
 - [ysandbox/qdrant](./qdrant) - Qdrant high-performance vector database for AI applications.
 - [ysandbox/searxng](./searxng) - SearXNG self-hosted meta-search engine with JSON API.
 - [ysandbox/skyvern](./skyvern) - Skyvern AI-powered browser automation platform with PostgreSQL.
 - [ysandbox/squid](./squid) - Squid proxy server.
 - [ysandbox/stirling-pdf](./stirling-pdf) - Stirling-PDF toolkit for merging, splitting, OCR, and converting PDFs.
 - [ysandbox/supabase](./supabase) - Self-hosted Supabase backend platform (PostgreSQL, Auth, Storage, Realtime, Edge Functions).
+- [ysandbox/supergateway](./supergateway) - Transport bridge — stdio MCP to SSE/WebSocket/HTTP.
 - [ysandbox/terraform-r2](./terraform-r2) - Terraform configuration for Cloudflare R2 storage.
 - [ysandbox/thumbor](./thumbor) - Thumbor on-demand image processing and resizing server.
 - [ysandbox/tika](./tika) - Apache Tika content detection and extraction (1000+ file formats).
