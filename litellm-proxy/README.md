@@ -1,5 +1,7 @@
 # LiteLLM Proxy
 
+![litellm-proxy](docs/dashboard.png)
+
 A unified API proxy for multiple LLM providers with PostgreSQL persistence and Prometheus monitoring. Configured to proxy Ollama's llama3.3:70b model.
 
 ## Services
