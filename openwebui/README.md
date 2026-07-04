@@ -1,5 +1,7 @@
 # Open WebUI
 
+![openwebui](docs/dashboard.png)
+
 OpenAI-compatible chat UI supporting multiple LLM providers. Features conversation history, model management, RAG, and web search.
 
 ## Services
