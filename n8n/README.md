@@ -33,6 +33,29 @@ n8n is a powerful workflow automation tool that enables you to connect various a
 
 3. Create your account on first access and start building workflows
 
+## Running
+
+```bash
+docker compose up -d
+```
+
+- **n8n editor:** http://localhost:5678
+- **Adminer (DB UI):** http://localhost:8000
+- **Qdrant REST:** http://localhost:6333
+
+First run is the **owner-account setup** — enter email, name, and a password
+(min 8 characters, must include a number) to create the owner, then you land on
+the Workflows overview and can start building.
+
+## Notes
+
+- Queue mode: the `n8n` editor and a separate `n8n-worker` share Postgres +
+  Redis; manual/heavy executions are offloaded to the worker.
+- Basic auth is disabled (`N8N_BASIC_AUTH_ACTIVE=false`) — the owner account is
+  the only gate.
+- Host ports are remapped to avoid clashes: Postgres on `5433`, Redis on `6380`
+  (services still use the standard ports inside the compose network).
+
 ## Architecture
 
 The setup uses:
