@@ -4,6 +4,19 @@
 
 High-performance vector database for similarity search and AI applications. Supports filtering, payload storage, and distributed deployment.
 
+## Running
+
+```bash
+docker compose up -d
+```
+
+- **REST API**: [`http://localhost:6333`](http://localhost:6333)
+- Web **dashboard**: [`http://localhost:6333/dashboard`](http://localhost:6333/dashboard)
+  — browse collections, run queries, and inspect points.
+- **gRPC API**: `localhost:6334`
+- No authentication by default (the `QDRANT__SERVICE__API_KEY` env var is
+  commented out in `docker-compose.yml`). Storage persists in `.docker/storage/`.
+
 ## Services
 
 - **qdrant**: Qdrant vector database server
