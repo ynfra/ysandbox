@@ -9,3 +9,4 @@ services:
     environment:
       THUMBOR_SECURITY_KEY: thumbor-sandbox-key
       ALLOW_UNSAFE_URL: "True"
+      THUMBOR_PORT: "8888"
