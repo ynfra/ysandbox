@@ -1,5 +1,7 @@
 # MinIO
 
+![minio console](docs/dashboard.png)
+
 S3-compatible object storage server. Drop-in replacement for Amazon S3 with a web console for bucket management.
 
 ## Services
