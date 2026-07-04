@@ -4,6 +4,23 @@
 
 Open-source observability platform for logs, metrics, and traces. Provides a Grafana-compatible UI and supports OTLP, FluentBit, Vector, and other ingestion formats.
 
+## Running
+
+```bash
+docker compose up -d
+```
+
+- Open [`http://localhost:5080`](http://localhost:5080) and log in as the root
+  user. Credentials come from `ZO_ROOT_USER_EMAIL` / `ZO_ROOT_USER_PASSWORD`,
+  which Compose reads from the `.env` file in this directory:
+  - Email: `admin@example.com`
+  - Password: `Complexpass#123`
+
+  (If `.env` is absent, the `docker-compose.yml` defaults `admin@example.com` /
+  `admin123` apply instead.)
+- Once logged in, explore **Logs**, **Metrics**, and **Traces**, and grab
+  ingestion snippets from the UI. Data persists in `.docker/openobserve/`.
+
 ## Services
 
 - **openobserve**: OpenObserve server with web UI and ingestion endpoints
