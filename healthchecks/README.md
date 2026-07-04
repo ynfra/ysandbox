@@ -1,5 +1,7 @@
 # Healthchecks
 
+![healthchecks](docs/dashboard.png)
+
 Cron job and uptime monitoring service. Create checks, receive pings from your jobs, and get alerted when something stops reporting.
 
 ## Services
