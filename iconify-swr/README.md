@@ -1,5 +1,7 @@
 # Iconify + SWR
 
+![iconify-swr](docs/dashboard.png)
+
 - Nginx on [`http://localhost:8080`](http://localhost:8080)
 - Iconify on [`http://localhost:3000`](http://localhost:3000)
 
@@ -8,6 +10,58 @@
 ```
 docker compose up
 ```
+
+## Running
+
+```sh
+docker compose up -d
+```
+
+- Nginx cache/proxy: [`http://localhost:8080`](http://localhost:8080) (host port `8080` → container `80`)
+- Iconify API direct: [`http://localhost:3000`](http://localhost:3000)
+
+Fetch a rendered icon through the cache (any Iconify icon set, e.g. `mdi`, `bi`):
+
+```sh
+# Material Design Icons "home", 200px tall
+curl "http://localhost:8080/mdi/home.svg?height=200"
+
+# Sized + tinted (URL-encode the leading # as %23)
+curl "http://localhost:8080/mdi/home.svg?height=400&color=%234f46e5"
+```
+
+`GET /` on the API 301-redirects to the upstream Iconify docs; request a
+concrete `/<prefix>/<icon>.svg` to get an actual image back.
+
+### How the SWR proxy-cache works
+
+Nginx sits in front of `iconify/api` and caches every icon response in the
+`cache` zone (`/srv/cache`, 10 GB max, 5 min inactive). Each response carries
+an `X-Cache-Status` header showing the cache decision:
+
+1. **MISS** — first request, fetched from the Iconify API and stored.
+2. **HIT** — served straight from cache while still fresh (`proxy_cache_valid 1m`).
+3. **STALE** — after expiry, the cached copy is returned *immediately* while
+   `proxy_cache_background_update` refreshes it in the background
+   (stale-while-revalidate). `proxy_cache_lock` ensures only one request does
+   the refresh; the rest keep getting the fast stale copy.
+4. **HIT** again — subsequent requests serve the freshly revalidated copy.
+
+Watch it live:
+
+```sh
+curl -i "http://localhost:8080/bi/bell-fill.svg?width=256" | grep X-Cache-Status
+```
+
+## Notes
+
+- No boot gotchas — the stack pulls `nginx:1.27` and `iconify/api:latest`
+  (forced `linux/amd64` under OrbStack) and serves immediately.
+- Host port clash: if `8080` is taken by another sandbox stack, drop a
+  gitignored `docker-compose.override.yml` remapping the nginx port with
+  `ports: !override` and use that instead — do not commit it.
+- Bring the stack down with `docker compose down` (state lives in `.docker/`,
+  gitignored).
 
 ## Configuration
 
