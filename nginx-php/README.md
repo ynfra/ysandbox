@@ -1,5 +1,7 @@
 <h1 align=center>Nginx Cookbook</h1>
 
+![nginx-php](docs/dashboard.png)
+
 <p align=center>
    Example of Nginx configurations with Docker.
 </p>
