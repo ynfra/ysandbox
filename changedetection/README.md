@@ -1,5 +1,7 @@
 # ChangeDetection.io
 
+![changedetection](docs/dashboard.png)
+
 Website change monitoring and notification service. Track changes on any website and get alerted when content changes.
 
 ## Services
