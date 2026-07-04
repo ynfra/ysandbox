@@ -1,5 +1,7 @@
 # Helicone
 
+![helicone](docs/dashboard.png)
+
 Open-source LLM proxy + analytics platform. Route OpenAI and Anthropic calls through Helicone to get request logging, cost tracking, user analytics, rate limiting, and caching.
 
 > Uses the `helicone/helicone-all-in-one` image which bundles PostgreSQL, ClickHouse, MinIO, and Redis into a single container.
