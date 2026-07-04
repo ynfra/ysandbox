@@ -1,5 +1,7 @@
 # LobeChat
 
+![lobechat](docs/dashboard.png)
+
 Client-side AI chat UI supporting multiple LLM providers (OpenAI, Anthropic, Google, Mistral, and more).
 
 ## Services
