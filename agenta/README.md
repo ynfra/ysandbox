@@ -2,6 +2,8 @@
 
 Open-source LLM engineering platform — prompt playground, side-by-side testing, evaluations, tracing, and datasets. Purpose-built for iterating on LLM applications with human and automated evals.
 
+![Agenta workspace](docs/workspace.png)
+
 ## Services
 
 | Service | Description |
