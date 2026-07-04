@@ -1,5 +1,7 @@
 # Stirling-PDF
 
+![stirling-pdf](docs/dashboard.png)
+
 Self-hosted PDF manipulation toolkit. Merge, split, convert, OCR, compress, and watermark PDF files through a web UI.
 
 ## Services
