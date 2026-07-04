@@ -1,5 +1,7 @@
 # LibreChat
 
+![librechat](docs/dashboard.png)
+
 Multi-model AI chat platform with conversation history, search, and plugin support. Supports OpenAI, Anthropic, Google, Azure, and custom endpoints.
 
 ## Services
