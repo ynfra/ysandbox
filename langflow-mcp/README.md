@@ -1,5 +1,7 @@
 # Langflow MCP bridge
 
+![langflow-mcp](docs/dashboard.png)
+
 A Model Context Protocol (MCP) server that exposes a running Langflow
 instance's workflow-automation API as MCP tools (flows, executions, builds,
 knowledge bases, variables, folders/projects, monitoring, and more).
@@ -70,6 +72,49 @@ tools.
 > to serve real tool data. Without one, the bridge process still starts and
 > binds port 8000 (the SSE/health endpoints respond) — tool calls just fail
 > until Langflow is reachable.
+
+## Running
+
+```bash
+docker compose up -d
+```
+
+Base URL is `http://localhost:8000`. Endpoints:
+
+- `http://localhost:8000/sse` — SSE stream (opens with an `event: endpoint`
+  frame carrying the per-session `/message?sessionId=...` path). This is what
+  the screenshot above captures — the raw event stream rendered in a browser.
+- `http://localhost:8000/healthz` — liveness probe, returns `ok`.
+
+Verify:
+
+```bash
+curl -sf http://localhost:8000/healthz    # -> ok
+curl -N http://localhost:8000/sse         # -> event: endpoint / data: /message?...
+```
+
+Stop with `docker compose down`.
+
+## Notes
+
+- **Wrapped package + version pin.** This stack runs
+  `supercorp/supergateway` wrapping the stdio-only `langflow-mcp-server`
+  (npm, from `nobrainer-tech/langflow-mcp`) and bridges it to SSE. The npm
+  version is pinned explicitly (`npx -y langflow-mcp-server@3.1.1`) in
+  `docker-compose.yml` rather than tracking `latest`: npm `latest` drifts and
+  can target a different Langflow API than the pinned server, so the pin keeps
+  the stack reproducible. Bump the pin deliberately after checking upstream.
+- **First boot needs internet.** The supergateway image fetches the wrapped
+  server via `npx` at container **start**, so the very first `up` needs
+  outbound network access and takes a few extra seconds before `/healthz`
+  answers.
+- **No Langflow backend required to boot.** The bridge starts and binds port
+  8000 (SSE + health respond) even without a reachable Langflow instance —
+  only real tool calls need a live `LANGFLOW_BASE_URL` + valid `LANGFLOW_API_KEY`.
+- **Host-port clash.** Default host port is 8000, shared with other ysandbox
+  stacks. To run alongside another stack on 8000, add a gitignored
+  `docker-compose.override.yml` remapping the published port (`ports: !override`)
+  — do not commit it.
 
 ## Links
 
