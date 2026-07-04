@@ -21,6 +21,8 @@ services:
     restart: unless-stopped
     environment:
       ZOO_MY_ID: "1"
+      # Allow the `ruok` four-letter word so the healthcheck below can probe it.
+      ZOO_4LW_COMMANDS_WHITELIST: "ruok,srvr,mntr,conf"
     volumes:
       - .docker/zookeeper:/data
     healthcheck:
@@ -42,8 +44,12 @@ services:
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
     volumes:
       - .docker/clickhouse:/var/lib/clickhouse
+      # Cluster / macros / zookeeper config so ReplicatedMergeTree and ON CLUSTER
+      # DDL (used by the backend's ClickHouse migrations) resolve correctly.
+      - ./clickhouse-macros.xml:/etc/clickhouse-server/config.d/macros.xml:ro
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1"]
+      # ClickHouse binds IPv4 only in this image; probe 127.0.0.1, not localhost/::1.
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:8123/ping || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -94,6 +100,8 @@ services:
   backend:
     image: ghcr.io/comet-ml/opik/opik-backend:latest
     restart: unless-stopped
+    # Run the MySQL (Liquibase) + ClickHouse DB migrations before starting the app.
+    command: ["bash", "-c", "./run_db_migrations.sh && ./entrypoint.sh"]
     depends_on:
       mysql:
         condition: service_healthy
@@ -131,11 +139,11 @@ services:
       TOGGLE_GUARDRAILS_ENABLED: "false"
       TOGGLE_WELCOME_WIZARD_ENABLED: "true"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
+      test: ["CMD", "curl", "-f", "http://localhost:8080/is-alive/ping"]
+      interval: 15s
       timeout: 10s
-      retries: 10
-      start_period: 90s
+      retries: 15
+      start_period: 120s
 
   python-backend:
     image: ghcr.io/comet-ml/opik/opik-python-backend:latest
@@ -156,7 +164,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      # Image ships wget (no curl); health route is /healthcheck and binds IPv4.
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:8000/healthcheck || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -165,13 +174,18 @@ services:
   frontend:
     image: ghcr.io/comet-ml/opik/opik-frontend:latest
     restart: unless-stopped
+    environment:
+      NGINX_PORT: "5173"
+    volumes:
+      # Opik frontend nginx template: serves on ${NGINX_PORT} and proxies /api to the backend.
+      - ./nginx_default.conf.template:/etc/nginx/templates/default.conf.template:ro
     ports:
       - "5173:5173"
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      test: ["CMD", "curl", "-f", "http://localhost:5173/health"]
       interval: 15s
       timeout: 5s
       retries: 5
