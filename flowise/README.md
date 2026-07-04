@@ -1,5 +1,7 @@
 # Flowise
 
+![flowise](docs/dashboard.png)
+
 Visual drag-and-drop builder for LLM agents and workflows. Compose chatflows, agents, and RAG pipelines from a node graph, then expose them via REST API or embed them. Ships with a large node library (LLMs, vector stores, tools, memory). Uses SQLite out of the box — no external database required.
 
 ## Services
