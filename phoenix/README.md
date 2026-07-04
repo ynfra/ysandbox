@@ -1,5 +1,7 @@
 # Phoenix
 
+![phoenix](docs/dashboard.png)
+
 Open-source LLM observability platform by Arize. Provides tracing, evals, and a UI for inspecting LLM application runs via OpenTelemetry.
 
 ## Services
