@@ -4,6 +4,20 @@
 
 Open-source search engine position tracking app. Monitors Google keyword rankings and sends notifications on position changes.
 
+## Running
+
+```bash
+docker compose up -d
+```
+
+- Open [`http://localhost:3000`](http://localhost:3000) and log in with the
+  credentials from `docker-compose.yml`:
+  - Username: `admin` (`USER_NAME`)
+  - Password: `admin` (`PASSWORD`)
+- After logging in, add a domain and its keywords to start tracking search
+  positions on the dashboard.
+- Application data (SQLite) persists in `.docker/data/`.
+
 ## Services
 
 - **serpbear**: SerpBear web application (Next.js + SQLite)
