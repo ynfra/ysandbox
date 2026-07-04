@@ -1,5 +1,7 @@
 # FrankenPHP demo
 
+![franken](docs/dashboard.png)
+
 ## Get started
 
 - `make install` - install dependencies
