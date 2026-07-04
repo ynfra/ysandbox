@@ -1,6 +1,7 @@
 services:
   pinchflat:
     image: ghcr.io/kieraneglin/pinchflat:latest
+    platform: linux/amd64
     restart: unless-stopped
     environment:
       - TZ=Europe/Prague
