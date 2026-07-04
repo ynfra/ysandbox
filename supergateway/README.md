@@ -1,5 +1,7 @@
 # Supergateway
 
+![supergateway](docs/dashboard.png)
+
 Transport bridge that runs a stdio-based MCP server and exposes it over SSE, WebSocket, or Streamable HTTP (and vice-versa). Useful for making local stdio MCP servers reachable over HTTP for remote access, debugging, or web-based clients.
 
 This stack wraps the `@modelcontextprotocol/server-everything` demo MCP server and exposes it over SSE on port 8000.
@@ -33,6 +35,45 @@ Send MCP messages via `POST http://localhost:8000/message`. Health check:
 ```bash
 curl http://localhost:8000/healthz
 ```
+
+## Running
+
+```bash
+docker compose up -d
+```
+
+Base URL: `http://localhost:8000`
+
+- `/sse` — SSE stream. On connect it emits the initial `event: endpoint`
+  handshake naming the per-session `/message?sessionId=...` POST endpoint
+  (this is what the screenshot above captures).
+- `/message` — POST endpoint for sending MCP JSON-RPC messages.
+- `/healthz` — health probe, returns `ok`.
+
+Verify:
+
+```bash
+curl -s http://localhost:8000/healthz          # -> ok
+curl -sN --max-time 3 http://localhost:8000/sse # -> event: endpoint ...
+```
+
+Bring down:
+
+```bash
+docker compose down
+```
+
+## Notes
+
+- The wrapped MCP server here is `@modelcontextprotocol/server-everything`
+  (the MCP demo/reference server), set via `--stdio` in `docker-compose.yml`.
+- **First boot needs outbound internet.** `supercorp/supergateway` fetches the
+  wrapped stdio server via `npx -y ...` at container *start*, so the first run
+  takes a few extra seconds while npm resolves the package. Subsequent boots
+  are faster.
+- Health check uses `wget` (busybox), which is present in the image, so the
+  container reports healthy once the bridge is listening.
+- Booted cleanly on OrbStack (macOS) with no config changes required.
 
 ## Configuration
 
