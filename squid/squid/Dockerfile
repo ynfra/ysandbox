@@ -1,6 +1,6 @@
 FROM debian:bookworm-slim
 
-RUN apt-get update && apt-get install -y squid gettext
+RUN apt-get update && apt-get install -y squid-openssl gettext
 
 COPY squid.conf.template /etc/squid/squid.conf.template
 COPY squid-ca.pem /etc/squid/squid-ca.pem

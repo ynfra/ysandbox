@@ -5,9 +5,10 @@ http_port 3128 ssl-bump generate-host-certificates=on cert=/etc/squid/squid-ca.p
 debug_options ALL,1
 
 # Enable SSL interception
+acl step1 at_step SslBump1
 ssl_bump peek step1
 ssl_bump bump all
-sslcrtd_program /usr/lib64/squid/security_file_certgen -s /var/lib/ssl_db -M 4MB
+sslcrtd_program /usr/lib/squid/security_file_certgen -s /var/lib/ssl_db -M 4MB
 
 # Cache settings
 cache_dir ufs /srv/data 51200 16 256

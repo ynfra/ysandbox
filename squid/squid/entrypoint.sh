@@ -14,6 +14,12 @@ mkdir -p /srv/logs
 # Process the template file and replace environment variables
 envsubst < /etc/squid/squid.conf.template > /etc/squid/squid.conf
 
+# Initialize the SSL certificate database used by ssl-bump (idempotent)
+if [ ! -d /var/lib/ssl_db/certs ]; then
+  echo "Initializing SSL certificate database..."
+  /usr/lib/squid/security_file_certgen -c -s /var/lib/ssl_db -M 4MB
+fi
+
 # Initialize the cache directories
 echo "Initializing Squid cache directories..."
 squid -N -z -F && rm -f /run/squid.pid
