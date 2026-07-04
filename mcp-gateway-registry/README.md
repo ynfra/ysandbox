@@ -1,5 +1,7 @@
 # MCP Gateway & Registry
 
+![mcp-gateway-registry](docs/dashboard.png)
+
 A governed control plane for MCP servers, AI agents, skills, and custom AI
 assets ([agentic-community/mcp-gateway-registry](https://github.com/agentic-community/mcp-gateway-registry)).
 It combines an **nginx reverse-proxy gateway**, a **FastAPI registry + web UI**,
@@ -63,6 +65,62 @@ make docker-up
 Then open http://localhost:7860 — the **AI Gateway & Registry** UI. First run
 pulls several GB of images and seeds MongoDB, so allow a few minutes; the
 registry reports `healthy` once nginx has reloaded a valid config.
+
+## Running
+
+```bash
+docker compose up -d      # or: make docker-up
+```
+
+First boot pulls several GB of images (registry bundles nginx + FastAPI +
+sentence-transformers) and seeds MongoDB, so allow a few minutes. Poll the UI:
+
+```bash
+curl -sf -o /dev/null -w '%{http_code}\n' http://localhost:7860
+```
+
+- **UI:** http://localhost:7860 — the **AI Gateway & Registry** web UI. It
+  reports `healthy` once nginx has reloaded a valid config. HTTPS on `8443`
+  is **not** served out of the box (needs mounted certs — see
+  [HTTPS (port 8443)](#https-port-8443)).
+- **Login:** the landing page offers **"Continue with Keycloak"** (OIDC).
+  Actually signing in requires provisioning the `mcp-gateway` realm with the
+  `mcp-gateway-web` / `mcp-gateway-m2m` clients and a user — see
+  [Auth / admin setup](#auth--admin-setup-first-run). Out of the box the realm
+  is empty, so the OIDC redirect lands on a Keycloak "realm does not exist"
+  page; the registry sign-in page itself (shown in the screenshot above)
+  renders fine without it.
+- **Keycloak admin console:** http://localhost:8080 — `admin` /
+  `sandbox-keycloak-admin` (`KEYCLOAK_ADMIN_PASSWORD`), master realm.
+- **Grafana:** http://localhost:3000 — `admin` / `sandbox-grafana-admin`.
+
+Bring the stack down with `docker compose down` (add `-v` to also drop the
+`mongodb-keyfile` named volume; delete `.docker/` to fully reset state).
+
+### Components
+
+`registry` (nginx gateway + FastAPI + UI) · `auth-server` (OAuth/OIDC broker) ·
+`mcpgw-server` (mcpgw MCP server) · `mongodb` + `mongodb-keyfile-init` +
+`mongodb-init` (storage, replica set `rs0`) · `openbao` (egress credential
+vault) · `keycloak` + `keycloak-db` (Postgres, identity provider) ·
+`prometheus` + `grafana` (metrics). `pingfederate` is opt-in via the
+`pingfederate` profile.
+
+## Notes
+
+- **Boots cleanly on OrbStack (kernel 7.x).** Plain `docker compose up -d`
+  brought every service up healthy with the tracked config; no fixes were
+  needed. In particular `mongo:8.2` (the compose default) started and passed
+  its healthcheck on OrbStack — it did **not** hit the AVX/"Illegal
+  instruction" crash (SERVER-121912) seen with some MongoDB tags on newer
+  kernels. If a future MongoDB tag crash-loops, pin `MONGODB_VERSION` to a
+  known-good build (e.g. `8.0.4`).
+- **`/var/run/docker.sock` is NOT mounted** by this tracked compose (unlike
+  the upstream build-from-source variant, which mounts it so the registry can
+  launch demo MCP-server containers). If you re-introduce that mount, note that
+  a Docker-socket mount is host-root-equivalent even when `:ro`.
+- The demo MCP servers and standalone metrics-service are omitted (not
+  published to ECR Public) — see the note under the intro.
 
 ## Configuration
 
