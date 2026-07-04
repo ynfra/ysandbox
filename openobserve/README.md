@@ -1,5 +1,7 @@
 # OpenObserve
 
+![openobserve](docs/dashboard.png)
+
 Open-source observability platform for logs, metrics, and traces. Provides a Grafana-compatible UI and supports OTLP, FluentBit, Vector, and other ingestion formats.
 
 ## Services
