@@ -37,6 +37,28 @@ Open http://localhost:3000 — create an account on first visit.
 > openssl rand -hex 32  # ENCRYPTION_KEY (use 64 hex chars)
 > ```
 
+## Running
+
+```bash
+docker compose up -d
+```
+
+- **UI:** http://localhost:3000
+- **MinIO S3 API:** http://localhost:9090
+
+First run: **sign up** to create the initial user, then create an
+**Organization** and a **Project** — the project dashboard is where traces, API
+keys, and evals live. Grab the project's public / secret keys (Settings → API
+Keys) for the SDK snippets below.
+
+## Notes
+
+- Multi-container stack (web + worker + Postgres + ClickHouse + Redis + MinIO)
+  with `depends_on` health gates — **first boot takes a while** until every
+  dependency reports healthy.
+- Datastores persist under `.docker/` (`postgres/`, `clickhouse/`, `redis/`,
+  `minio/`).
+
 ## Configuration
 
 Key environment variables in `.env`:
