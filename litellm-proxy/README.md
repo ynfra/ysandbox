@@ -22,6 +22,27 @@ A unified API proxy for multiple LLM providers with PostgreSQL persistence and P
 make up
 ```
 
+## Running
+
+```bash
+docker compose up -d
+```
+
+- **Proxy API:** http://localhost:4000 (authenticate with the master key `sk-1234`)
+- **Admin UI:** http://localhost:4000/ui
+- **Prometheus:** http://localhost:9090
+
+Log into the admin UI as user **`admin`** with password **`sk-1234`** (the
+`LITELLM_MASTER_KEY`; no `UI_PASSWORD` is set). From there manage Virtual Keys,
+Models, and Usage.
+
+## Notes
+
+- `STORE_MODEL_IN_DB=True` — models added in the UI persist to Postgres
+  (`.docker/postgres/`).
+- Proxied models come from `litellm/config.yml`; the sample config serves
+  Ollama's `llama3.3:70b`.
+
 ## Configuration
 
 Key environment variables:
