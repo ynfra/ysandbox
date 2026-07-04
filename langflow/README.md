@@ -1,5 +1,7 @@
 # Langflow
 
+![langflow](docs/dashboard.png)
+
 Visual, low-code builder for AI workflows and agents. Drag-and-drop components
 into flows, wire up LLMs, vector stores, prompts, and tools, then run or expose
 them via API. Every Langflow project also ships a built-in MCP server, so any
