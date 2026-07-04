@@ -397,7 +397,7 @@ services:
       DATABASE_URL: ecto://supabase_admin:${POSTGRES_PASSWORD:-supabase-sandbox}@db:5432/_supabase
       CLUSTER_POSTGRES: "true"
       SECRET_KEY_BASE: ${SECRET_KEY_BASE:-sandbox-secret-key-base-min-64-chars-long-enough-for-phoenix-erlang!}
-      VAULT_ENC_KEY: ${VAULT_ENC_KEY:-sandbox-vault-enc-key-32-chars!}
+      VAULT_ENC_KEY: ${VAULT_ENC_KEY:-sandbox-vault-enc-key-32chars-ok}
       API_JWT_SECRET: ${JWT_SECRET}
       METRICS_JWT_SECRET: ${JWT_SECRET}
       REGION: local
