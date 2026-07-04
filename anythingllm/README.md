@@ -30,6 +30,26 @@ make docker-up
 
 3. Complete the setup wizard on first launch
 
+## Running
+
+```bash
+docker compose up -d
+```
+
+- **UI:** http://localhost:3001
+
+First run launches the **onboarding wizard**: pick an LLM provider (and enter
+its API key), accept the embedding / vector-DB defaults (native embeddings +
+LanceDB), create a workspace, then land in the workspace chat. Upload documents
+to a workspace to chat over them (RAG).
+
+## Notes
+
+- The LLM provider is left unset in `.env` — either uncomment `LLM_PROVIDER`
+  plus its API key there, or configure it entirely from the onboarding wizard /
+  Settings.
+- Workspaces, vectors, and uploads persist under `.docker/storage/`.
+
 ## Configuration
 
 Key settings in `.env`:
