@@ -5,6 +5,23 @@
 - Nginx on [`http://localhost:8080`](http://localhost:8080)
 - App on [`http://localhost:3000`](http://localhost:3000)
 
+## Running
+
+```bash
+docker compose up -d
+```
+
+- Open [`http://localhost:8080`](http://localhost:8080) — Nginx serves the Bun
+  app (`app:3000`) through its proxy cache with stale-while-revalidate. The
+  response body is a timestamp (`Now: <date>`) so repeated requests show the
+  caching behaviour.
+- The `X-Cache-Status` response header reports `MISS` / `HIT` / `STALE` /
+  `UPDATING` — see the `curl` examples below.
+- [`http://localhost:3000`](http://localhost:3000) hits the Bun origin
+  directly (uncached), for comparison.
+
+No authentication — this is a static caching demo.
+
 ## Usage
 
 ```
