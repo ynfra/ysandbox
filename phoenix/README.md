@@ -47,6 +47,29 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 ```
 
+## Running
+
+```bash
+docker compose up -d
+```
+
+- **UI:** http://localhost:6006
+- **OTLP gRPC collector:** http://localhost:4317
+
+The dashboard opens with **no authentication** by default — `PHOENIX_ENABLE_AUTH`
+is not set in the compose, so you land straight on the Projects / Traces view.
+Point your app's OTLP exporter at port 4317 (see above) and traces appear under
+the matching project.
+
+## Notes
+
+- Auth is off even though `PHOENIX_DEFAULT_ADMIN_INITIAL_PASSWORD` (`admin`) is
+  provided — that seed only applies once you enable auth by setting
+  `PHOENIX_ENABLE_AUTH=true` (plus a `PHOENIX_SECRET`), after which you log in as
+  `admin@localhost` with that password.
+- Trace data persists in Postgres (`.docker/postgres/`); the Phoenix working dir
+  in `.docker/phoenix/`.
+
 ## Configuration
 
 Key settings in `.env`:
