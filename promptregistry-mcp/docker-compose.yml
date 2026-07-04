@@ -1,0 +1,33 @@
+services:
+  promptregistry-mcp:
+    image: supercorp/supergateway:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # Prompt storage directory inside the container (bind-mounted below)
+      PROMPT_REGISTRY_PROJECT_DIR: /data
+    command:
+      - "--stdio"
+      - "npx -y mcp-promptregistry"
+      - "--outputTransport"
+      - "sse"
+      - "--port"
+      - "8000"
+      - "--baseUrl"
+      - "http://localhost:8000"
+      - "--ssePath"
+      - "/sse"
+      - "--messagePath"
+      - "/message"
+      - "--healthEndpoint"
+      - "/healthz"
+      - "--cors"
+    volumes:
+      - ./.docker/prompts:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

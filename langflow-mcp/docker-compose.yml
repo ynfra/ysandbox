@@ -1,0 +1,41 @@
+services:
+  langflow-mcp:
+    image: supercorp/supergateway:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # langflow-mcp-server is stdio-only; MCP_MODE stays stdio and
+      # supergateway bridges it to SSE. These vars are inherited by the
+      # child `npx langflow-mcp-server` process.
+      MCP_MODE: stdio
+      LANGFLOW_BASE_URL: ${LANGFLOW_BASE_URL:-http://host.docker.internal:7860}
+      LANGFLOW_API_KEY: ${LANGFLOW_API_KEY:-changeme-sandbox-key}
+      LANGFLOW_CONSOLIDATED_TOOLS: ${LANGFLOW_CONSOLIDATED_TOOLS:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command:
+      - "--stdio"
+      - "npx -y langflow-mcp-server@3.1.1"
+      - "--outputTransport"
+      - "sse"
+      - "--port"
+      - "8000"
+      - "--baseUrl"
+      - "http://localhost:8000"
+      - "--ssePath"
+      - "/sse"
+      - "--messagePath"
+      - "/message"
+      - "--healthEndpoint"
+      - "/healthz"
+      - "--cors"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

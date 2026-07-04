@@ -1,0 +1,22 @@
+# Dify MCP Server configuration
+#
+# The server connects to a Dify instance and exposes each configured
+# Dify app (workflow) as an MCP tool. It needs a REAL, reachable Dify
+# backend: at startup it calls `<dify_base_url>/info` for every SK below,
+# so any invalid/unreachable key makes the server crash on launch.
+
+# Base URL of your Dify API (Dify Cloud shown; use your self-hosted URL otherwise).
+dify_base_url: "https://cloud.dify.ai/v1"
+
+# List of Dify App Secret Keys (SKs). Each SK maps to one Dify workflow app
+# and becomes one MCP tool. You MUST supply at least one REAL key (format
+# "app-xxxxxxxx") for the server to expose any tools.
+#
+# The list is left EMPTY by default so the stack starts cleanly for sandbox
+# testing without a real Dify backend (the server runs with zero tools).
+# Uncomment and replace with your real key(s) to expose your workflows:
+#
+#   dify_app_sks:
+#     - "app-xxxxxxxx"
+#     - "app-yyyyyyyy"
+dify_app_sks: []
