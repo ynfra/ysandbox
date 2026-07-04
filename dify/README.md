@@ -1,5 +1,7 @@
 # Dify
 
+![dify](docs/dashboard.png)
+
 Open-source LLM app development platform — visual workflow/agent builder, RAG pipelines, prompt orchestration, and a model-agnostic backend (100k+ ⭐). Build assistants, agents and chat apps in a drag-and-drop canvas, then expose them as APIs or **MCP servers**. This is a large, multi-container stack; the compose here is a sandbox-trimmed but bootable subset of the official `docker/` deployment (Dify `1.15.0`).
 
 ## Services
@@ -38,6 +40,38 @@ http://localhost:8080/install to create the initial admin account.
 
 > **Note:** The API runs database migrations on first boot, so the console may
 > take a minute or two to become reachable while `api`/`worker` initialize.
+
+## Running
+
+```bash
+docker compose up -d      # or: make docker-up
+```
+
+Then open **http://localhost:8080**. On first launch you are redirected to
+**http://localhost:8080/install** to create the initial admin (owner) account —
+supply an email, username, and an 8+ char password (letters + numbers). Dify
+signs you straight in and drops you on the **Studio** apps dashboard
+(`/apps`, "Build your first App"). From there add a model provider under
+**Settings → Model Provider**, then create an app from a template or blank
+canvas.
+
+Ten containers boot together: `nginx` (entry proxy) → `web` + `api` + `worker`,
+backed by `db` (PostgreSQL), `redis`, `weaviate` (vectors), `sandbox` (code
+execution) fronted by `ssrf_proxy` (Squid), plus a one-shot `init_permissions`
+that fixes storage ownership. Bring it down with `docker compose down` (state
+persists under `.docker/`).
+
+### Notes / gotchas
+
+- **First boot is slow.** This is a large stack with big image pulls; `api`
+  runs DB migrations before the console answers. Poll
+  `curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/install`
+  until it returns `200` (allow a few minutes on a cold pull).
+- **"Failed to request plugin daemon" toasts are expected.** The optional
+  `plugin_daemon` service is intentionally omitted from this lean sandbox, so
+  the console shows a transient plugin-daemon warning on first load. It is
+  harmless — the core app/workflow/RAG features work without it; only the
+  in-app plugin marketplace is unavailable.
 
 ## Configuration
 
