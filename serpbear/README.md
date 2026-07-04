@@ -1,5 +1,7 @@
 # SerpBear
 
+![serpbear](docs/dashboard.png)
+
 Open-source search engine position tracking app. Monitors Google keyword rankings and sends notifications on position changes.
 
 ## Services
