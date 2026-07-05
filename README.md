@@ -3,6 +3,7 @@
 Examples of ynfrastructure.
 
 - [ysandbox/activepieces](./activepieces) - Open-source no-code workflow automation (Zapier alternative) with MCP support, backed by PostgreSQL and Redis.
+- [ysandbox/agenta](./agenta) - Agenta LLM engineering platform — prompt playground, evaluations, and tracing.
 - [ysandbox/agentregistry](./agentregistry) - Registry for MCP servers, agents, skills, and prompts (server + PostgreSQL).
 - [ysandbox/anythingllm](./anythingllm) - AnythingLLM document-aware AI chat with RAG.
 - [ysandbox/browserless](./browserless) - Headless Chromium API for browser automation, screenshots, and PDF generation.
@@ -21,11 +22,13 @@ Examples of ynfrastructure.
 - [ysandbox/grafana-stack](./grafana-stack) - Grafana, Prometheus, MinIO, Mimir, Nginx monitoring stack.
 - [ysandbox/haproxy-consul](./haproxy-consul) - HAProxy with Consul service discovery.
 - [ysandbox/healthchecks](./healthchecks) - Healthchecks.io cron job and uptime monitoring.
+- [ysandbox/helicone](./helicone) - Helicone LLM proxy and analytics — request logging, cost tracking, and caching.
 - [ysandbox/iconify-swr](./iconify-swr) - Nginx + App (Iconify) with proxy cache and stale-while-revalidate (SWR).
 - [ysandbox/imgproxy](./imgproxy) - Fast on-the-fly image processing server (resize, crop, format conversion) powered by libvips.
 - [ysandbox/kasm-chromium](./kasm-chromium) - Kasm Workspaces Chromium browser with VNC web access.
 - [ysandbox/langflow](./langflow) - Visual AI workflow builder; flows exposed as MCP tools (with PostgreSQL).
 - [ysandbox/langflow-mcp](./langflow-mcp) - MCP bridge exposing Langflow flows as MCP tools (via supergateway).
+- [ysandbox/langfuse](./langfuse) - Langfuse LLM observability — traces, evals, and prompt management.
 - [ysandbox/librechat](./librechat) - Multi-model AI chat platform with MongoDB and Meilisearch.
 - [ysandbox/litellm-proxy](./litellm-proxy) - LiteLLM proxy with PostgreSQL and Prometheus monitoring.
 - [ysandbox/lobechat](./lobechat) - LobeChat client-side AI chat UI for multiple LLM providers.
@@ -46,13 +49,19 @@ Examples of ynfrastructure.
 - [ysandbox/nginx-proxy](./nginx-proxy) - Nginx + App (Bun.js) with proxy pass.
 - [ysandbox/nginx-swr](./nginx-swr) - Nginx + App (Bun.js) with proxy cache and stale-while-revalidate (SWR).
 - [ysandbox/open-interpreter](./open-interpreter) - Code-executing AI agent via WebSocket and HTTP API.
+- [ysandbox/openobserve](./openobserve) - OpenObserve observability platform for logs, metrics, and traces.
+- [ysandbox/openserp](./openserp) - Search engine results API (Google, Bing, Yandex, Baidu, DuckDuckGo).
 - [ysandbox/openwebui](./openwebui) - Open WebUI chat interface for multiple LLM providers.
+- [ysandbox/opik](./opik) - Opik LLM observability and evaluation platform by Comet.
 - [ysandbox/paddleocr](./paddleocr) - PaddleOCR REST API service supporting 80+ languages.
 - [ysandbox/pandoc](./pandoc) - Pandoc universal document format converter (Markdown, DOCX, EPUB, HTML, LaTeX).
 - [ysandbox/paperless](./paperless) - Paperless-NGX document management with OCR, bundled with Tika and Gotenberg.
+- [ysandbox/phoenix](./phoenix) - Arize Phoenix LLM observability — tracing, evals, and OpenTelemetry support.
 - [ysandbox/promptregistry-mcp](./promptregistry-mcp) - Simple MCP prompt registry (via supergateway).
 - [ysandbox/qdrant](./qdrant) - Qdrant high-performance vector database for AI applications.
 - [ysandbox/searxng](./searxng) - SearXNG self-hosted meta-search engine with JSON API.
+- [ysandbox/seonaut](./seonaut) - SEOnaut SEO auditing tool — crawls sites for ranking issues.
+- [ysandbox/serpbear](./serpbear) - SerpBear search engine keyword position tracking.
 - [ysandbox/skyvern](./skyvern) - Skyvern AI-powered browser automation platform with PostgreSQL.
 - [ysandbox/squid](./squid) - Squid proxy server.
 - [ysandbox/stirling-pdf](./stirling-pdf) - Stirling-PDF toolkit for merging, splitting, OCR, and converting PDFs.
@@ -61,7 +70,11 @@ Examples of ynfrastructure.
 - [ysandbox/terraform-r2](./terraform-r2) - Terraform configuration for Cloudflare R2 storage.
 - [ysandbox/thumbor](./thumbor) - Thumbor on-demand image processing and resizing server.
 - [ysandbox/tika](./tika) - Apache Tika content detection and extraction (1000+ file formats).
+- [ysandbox/traceloop](./traceloop) - Traceloop Hub LLM observability on OpenTelemetry.
+- [ysandbox/unlighthouse](./unlighthouse) - Full-site Google Lighthouse scanning with web dashboard.
 - [ysandbox/uptime-kuma](./uptime-kuma) - Self-hosted uptime monitoring dashboard with status pages and notifications.
 - [ysandbox/weaviate](./weaviate) - Weaviate open-source vector database with hybrid vector + BM25 search (REST, GraphQL, gRPC).
 - [ysandbox/webtop-browser](./webtop-browser) - LinuxServer web-accessible Linux desktop environment.
 - [ysandbox/windmill](./windmill) - Windmill workflow engine with Caddy.
+- [ysandbox/yellowlabtools](./yellowlabtools) - YellowLabTools web page performance and front-end quality analysis.
+- [ysandbox/youtube-downloader](./youtube-downloader) - YouTube media downloader (Pinchflat + MeTube).
