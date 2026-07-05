@@ -2,10 +2,12 @@
 
 Examples of ynfrastructure.
 
+- [ysandbox/activepieces](./activepieces) - Open-source no-code workflow automation (Zapier alternative) with MCP support, backed by PostgreSQL and Redis.
 - [ysandbox/agentregistry](./agentregistry) - Registry for MCP servers, agents, skills, and prompts (server + PostgreSQL).
 - [ysandbox/anythingllm](./anythingllm) - AnythingLLM document-aware AI chat with RAG.
 - [ysandbox/browserless](./browserless) - Headless Chromium API for browser automation, screenshots, and PDF generation.
 - [ysandbox/changedetection](./changedetection) - ChangeDetection.io website change monitoring and notifications.
+- [ysandbox/chroma](./chroma) - AI-native open-source vector/embedding database for LLM apps and semantic search.
 - [ysandbox/chromium-browser](./chromium-browser) - LinuxServer Chrome browser with MCP extensions support.
 - [ysandbox/crawl4ai](./crawl4ai) - AI-powered web crawler with structured data extraction.
 - [ysandbox/dify](./dify) - Visual LLM app/workflow builder; apps can be exposed as MCP servers.
@@ -20,6 +22,7 @@ Examples of ynfrastructure.
 - [ysandbox/haproxy-consul](./haproxy-consul) - HAProxy with Consul service discovery.
 - [ysandbox/healthchecks](./healthchecks) - Healthchecks.io cron job and uptime monitoring.
 - [ysandbox/iconify-swr](./iconify-swr) - Nginx + App (Iconify) with proxy cache and stale-while-revalidate (SWR).
+- [ysandbox/imgproxy](./imgproxy) - Fast on-the-fly image processing server (resize, crop, format conversion) powered by libvips.
 - [ysandbox/kasm-chromium](./kasm-chromium) - Kasm Workspaces Chromium browser with VNC web access.
 - [ysandbox/langflow](./langflow) - Visual AI workflow builder; flows exposed as MCP tools (with PostgreSQL).
 - [ysandbox/langflow-mcp](./langflow-mcp) - MCP bridge exposing Langflow flows as MCP tools (via supergateway).
@@ -31,6 +34,7 @@ Examples of ynfrastructure.
 - [ysandbox/mcphub](./mcphub) - Unified hub/gateway for multiple MCP servers with dashboard and Streamable HTTP/SSE.
 - [ysandbox/mcpjungle](./mcpjungle) - Self-hosted MCP gateway/registry — one endpoint for many MCP servers (with PostgreSQL).
 - [ysandbox/mcpo](./mcpo) - Expose MCP tools as OpenAPI/REST (by Open WebUI).
+- [ysandbox/meilisearch](./meilisearch) - Lightning-fast, typo-tolerant search engine with a REST API and built-in search preview UI.
 - [ysandbox/metabase-multi](./metabase-multi) - Dual Metabase instances with separate PostgreSQL databases.
 - [ysandbox/metamcp](./metamcp) - MCP proxy/aggregator with middleware and namespaces (with PostgreSQL).
 - [ysandbox/minio](./minio) - MinIO S3-compatible object storage with web console.
@@ -57,5 +61,7 @@ Examples of ynfrastructure.
 - [ysandbox/terraform-r2](./terraform-r2) - Terraform configuration for Cloudflare R2 storage.
 - [ysandbox/thumbor](./thumbor) - Thumbor on-demand image processing and resizing server.
 - [ysandbox/tika](./tika) - Apache Tika content detection and extraction (1000+ file formats).
+- [ysandbox/uptime-kuma](./uptime-kuma) - Self-hosted uptime monitoring dashboard with status pages and notifications.
+- [ysandbox/weaviate](./weaviate) - Weaviate open-source vector database with hybrid vector + BM25 search (REST, GraphQL, gRPC).
 - [ysandbox/webtop-browser](./webtop-browser) - LinuxServer web-accessible Linux desktop environment.
 - [ysandbox/windmill](./windmill) - Windmill workflow engine with Caddy.

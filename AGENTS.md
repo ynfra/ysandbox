@@ -73,11 +73,13 @@ Named Docker volumes (e.g. `db-config`, `deno-cache` in `supabase`) are managed 
 
 | Service | Primary Image | Port(s) | Description |
 |---------|--------------|---------|-------------|
+| `activepieces` | `ghcr.io/activepieces/activepieces:0.86.0` + PostgreSQL (pgvector) + Redis | 8081 | No-code workflow automation (Zapier alternative) with MCP support |
 | `agenta` | `ghcr.io/agenta-ai/agenta-web` + Traefik | 8081 | LLM engineering platform — prompt playground, evals, tracing |
 | `agentregistry` | `ghcr.io/agentregistry-dev/agentregistry/server` + PostgreSQL | 12121 (UI/API), 31313 (MCP) | Registry for MCP servers, agents, skills, and prompts |
 | `anythingllm` | `mintplexlabs/anythingllm:latest` | 3001 | Document-aware AI chat with RAG |
 | `browserless` | `ghcr.io/browserless/chromium:latest` | 3000 | Headless Chromium API for screenshots, PDFs, automation |
 | `changedetection` | `ghcr.io/dgtlmoon/changedetection.io:latest` | 5000 | Website change monitoring and notifications |
+| `chroma` | `chromadb/chroma:1.5.9` | 8000 | AI-native open-source vector/embedding database (v2 REST API) |
 | `chromium-browser` | `lscr.io/linuxserver/chrome:latest` | 3000 | LinuxServer Chrome with MCP extension support |
 | `crawl4ai` | `unclecode/crawl4ai:latest` | 11235 | AI-powered web crawler with structured data extraction |
 | `dify` | `langgenius/dify-api` + `dify-web` + `dify-sandbox` + PostgreSQL + Redis + Weaviate + Nginx | 8080 | Visual LLM app/workflow builder; apps can be exposed as MCP servers |
@@ -93,6 +95,7 @@ Named Docker volumes (e.g. `db-config`, `deno-cache` in `supabase`) are managed 
 | `healthchecks` | `healthchecks/healthchecks:latest` | 8000 | Cron job and uptime monitoring |
 | `helicone` | `helicone/helicone-all-in-one:latest` | 3000 | LLM proxy + analytics (request logging, cost tracking, caching) |
 | `iconify-swr` | `nginx:1.27` + `iconify/api:latest` | 8080 | Nginx + Iconify with proxy cache and stale-while-revalidate |
+| `imgproxy` | `darthsim/imgproxy:v4.0.11` | 8085 | Fast on-the-fly image processing (resize, crop, WebP/AVIF) via URL parameters |
 | `kasm-chromium` | `kasmweb/chromium:1.17.0` | 6901 | Kasm Workspaces Chromium with VNC web access |
 | `langflow` | `langflowai/langflow:1.10.1` + PostgreSQL | 7860 | Visual AI workflow builder; flows exposed as MCP tools |
 | `langflow-mcp` | `supercorp/supergateway` (wraps `langflow-mcp-server`) | 8000 | MCP bridge exposing Langflow flows as MCP tools (stdio→SSE) |
@@ -105,6 +108,7 @@ Named Docker volumes (e.g. `db-config`, `deno-cache` in `supabase`) are managed 
 | `mcphub` | `samanhappy/mcphub:latest` | 3000 | Unified hub/gateway for multiple MCP servers with dashboard and Streamable HTTP/SSE |
 | `mcpjungle` | `ghcr.io/mcpjungle/mcpjungle` + PostgreSQL | 8080 | Self-hosted MCP gateway/registry — one endpoint for many MCP servers |
 | `mcpo` | `ghcr.io/open-webui/mcpo:main` | 8000 | Expose MCP tools as OpenAPI/REST (by Open WebUI) |
+| `meilisearch` | `getmeili/meilisearch:v1.48.3` | 7700 | Lightning-fast, typo-tolerant full-text search engine with REST API and search preview UI |
 | `metabase-multi` | `metabase/metabase:v0.56.x` ×2 + PostgreSQL ×2 | 3001, 3002 | Dual Metabase instances with separate PostgreSQL databases |
 | `metamcp` | `ghcr.io/metatool-ai/metamcp:latest` + PostgreSQL | 12008 | MCP proxy/aggregator with middleware and namespaces |
 | `minio` | `minio/minio:latest` | 9000 (API), 9001 (console) | MinIO S3-compatible object storage |
@@ -139,6 +143,8 @@ Named Docker volumes (e.g. `db-config`, `deno-cache` in `supabase`) are managed 
 | `tika` | `apache/tika:latest` | 9998 | Content detection and extraction (1000+ file formats) |
 | `traceloop` | `traceloop/hub` + PostgreSQL | 3030 | LLM observability on OpenTelemetry |
 | `unlighthouse` | `ghcr.io/indykoning/unlighthouse-docker:master` | 5678 | Full-site Google Lighthouse scanning with web dashboard |
+| `uptime-kuma` | `louislam/uptime-kuma:2.4.0` | 3001 | Self-hosted uptime monitoring dashboard with status pages and notifications |
+| `weaviate` | `semitechnologies/weaviate:1.38.2` | 8080 (REST/GraphQL), 50051 (gRPC) | Open-source vector database with hybrid vector + BM25 search |
 | `webtop-browser` | `lscr.io/linuxserver/webtop:latest` | 3000 | Web-accessible Linux desktop environment |
 | `windmill` | `ghcr.io/windmill-labs/windmill` (via `$WM_IMAGE`) + Caddy + PostgreSQL | 8000 | Workflow engine with Caddy reverse proxy |
 | `yellowlabtools` | `ousamabenyounes/yellowlabtools:latest` | 8383 | Web page performance and front-end quality analysis |
