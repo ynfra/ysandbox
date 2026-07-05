@@ -1,0 +1,13 @@
+services:
+  imgproxy:
+    image: darthsim/imgproxy:v4.0.11
+    restart: unless-stopped
+    ports:
+      - "8085:8080"
+    volumes:
+      - ./.docker/images:/images
+    environment:
+      # No IMGPROXY_KEY / IMGPROXY_SALT — unsigned /insecure/ URLs (sandbox only)
+      IMGPROXY_LOCAL_FILESYSTEM_ROOT: /images
+      IMGPROXY_AUTO_WEBP: "true"
+      IMGPROXY_ALLOW_ORIGIN: "*"
