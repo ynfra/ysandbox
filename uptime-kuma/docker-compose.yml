@@ -1,0 +1,14 @@
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:2.4.0
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./.docker/data:/app/data
+    healthcheck:
+      test: ["CMD", "/app/extra/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
