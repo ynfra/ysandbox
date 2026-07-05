@@ -1,43 +1,39 @@
 # Squid Forward Proxy
 
-![squid](docs/dashboard.png)
-
 A [Squid](http://www.squid-cache.org/) forward proxy with SSL-Bump (HTTPS
 interception) that chains all traffic to an upstream parent proxy. Built locally
-from `debian:bookworm-slim` and published on host port **3128**.
+from `debian:bookworm-slim` (installs `squid-openssl`) and published on host port
+**3128**.
 
-## Architecture
+![squid](docs/dashboard.png)
 
-![architecture](.docs/arch.png)
+## Usage
 
-Squid listens on `3128` with `ssl-bump` enabled (peek at step 1, bump all),
-generating per-host certificates on the fly from the bundled CA
-(`squid/squid-ca.pem`). Every request is forwarded to a parent proxy
-(`never_direct allow all`) configured via environment variables — by default
-`p.webshare.io:80` with placeholder credentials.
-
-## Running
-
-This is a **local `build:` stack** — it must be built before first run:
+This is a **local `build:` stack** — build it before first run:
 
 ```bash
-docker compose up -d --build
+make docker-up            # or: docker compose up -d --build
 ```
 
-The parent proxy host/port/credentials are set in `docker-compose.yml`:
+Squid listens on `3128` with `ssl-bump` enabled, generating per-host
+certificates on the fly from the bundled CA (`squid/squid-ca.pem`). Every request
+is forwarded to the parent proxy configured via env vars (default
+`p.webshare.io:80` with placeholder credentials). Regenerate the CA with
+`make ssl` if needed.
 
-```yaml
-environment:
-  - PROXY_HOST=p.webshare.io
-  - PROXY_PORT=80
-  - PROXY_USER=foo
-  - PROXY_PASS=bar
-```
+> A direct `GET http://localhost:3128/` (no proxy target) returns a
+> Squid-generated **"ERROR: The requested URL could not be retrieved"** page —
+> that is the screenshot above and confirms Squid is up. With placeholder upstream
+> credentials, proxying to the real internet returns **407 Proxy Authentication
+> Required** from the parent until real credentials are supplied.
+>
+> **SSL-Bump requires the OpenSSL build of Squid.** Debian's plain `squid` package
+> is compiled without OpenSSL (`ssl-bump` fails with `Unknown http_port option`),
+> so the Dockerfile installs `squid-openssl`. `security_file_certgen` lives at
+> `/usr/lib/squid/` on Debian (not `/usr/lib64/`), and the SSL cert DB is
+> initialized on startup by the entrypoint before Squid launches.
 
-Replace `PROXY_USER` / `PROXY_PASS` with real upstream credentials to actually
-reach the internet. The defaults are placeholders.
-
-### Using it as a proxy
+<details><summary>Using it as a proxy</summary>
 
 ```bash
 # HTTP request routed through Squid
@@ -47,35 +43,40 @@ curl -x http://localhost:3128 http://example.com
 curl -x http://localhost:3128 --cacert squid/squid-ca.pem https://example.com
 ```
 
-A direct browser/`curl` GET to `http://localhost:3128/` (no proxy target) returns
-a Squid-generated **"ERROR: The requested URL could not be retrieved"** page —
-that is the page shown in the screenshot above and confirms Squid is up.
+</details>
 
-Regenerate the CA with `make ssl` if needed.
+## Services
 
-## Notes
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **squid** | `3128` | Locally built Squid proxy with SSL-Bump, chaining to a parent proxy |
 
-- **Screenshot** shows the Squid error page served on `3128` when the port is
-  hit directly (no upstream target). Squid is running and answering — it just
-  has nothing to proxy for a bare `GET /`.
-- **SSL-Bump requires the OpenSSL build of Squid.** Debian's plain `squid`
-  package is compiled without OpenSSL, so `ssl-bump` directives fail with
-  `Unknown http_port option 'ssl-bump'`. The Dockerfile installs
-  **`squid-openssl`** instead.
-- **`security_file_certgen` lives at `/usr/lib/squid/`** on Debian (not
-  `/usr/lib64/`, which is a Red Hat path) — referenced in `squid.conf.template`.
-- **The `step1` ACL must be defined** (`acl step1 at_step SslBump1`) before it
-  can be used in `ssl_bump peek step1`.
-- **The SSL cert DB is initialized on startup** by the entrypoint
-  (`security_file_certgen -c -s /var/lib/ssl_db`) before Squid launches.
-- With placeholder upstream credentials, proxying to the real internet returns
-  **407 Proxy Authentication Required** from the parent — expected until real
-  credentials are supplied.
-- Host port `3128` is the Squid default. If another stack already binds it, add a
-  gitignored `docker-compose.override.yml` with `ports: !override` to remap.
+## Configuration
 
-## Stopping
+Environment variables set in `docker-compose.yml` (placeholder defaults):
 
-```bash
-docker compose down
-```
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `PROXY_HOST` | `p.webshare.io` | Parent proxy host |
+| `PROXY_PORT` | `80` | Parent proxy port |
+| `PROXY_USER` | `foo` | Parent proxy username; **change** to reach the internet |
+| `PROXY_PASS` | `bar` | Parent proxy password; **change** to reach the internet |
+
+## Volumes
+
+| Path | Contents |
+|------|----------|
+| `.docker/squid/data/` | Squid cache/data |
+| `.docker/squid/logs/` | Squid access/cache logs |
+
+## Observability
+
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Proxy up | `curl -x http://localhost:3128 http://example.com` |
+| Logs | `docker compose logs -f squid` |
+
+## Resources
+
+- Docs: http://www.squid-cache.org/
+- SSL-Bump: https://wiki.squid-cache.org/Features/SslBump

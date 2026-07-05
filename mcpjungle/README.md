@@ -11,33 +11,14 @@ Runs in `development` mode by default (single-user, no auth) — switch
 
 ![MCPJungle dashboard](docs/dashboard.png)
 
-## Services
-
-| Service | Description |
-|---------|-------------|
-| **mcpjungle** | MCP gateway/registry server; serves the unified MCP endpoint (`/mcp`) and HTTP API |
-| **postgres** | PostgreSQL 17 storing registered servers, tools, groups, and state |
-
-## Ports
-
-| Port | Service |
-|------|---------|
-| `8080` | MCP gateway (`/mcp`), HTTP API, health (`/health`), metrics (`/metrics`) |
-| `5432` | PostgreSQL (bound to `127.0.0.1`) |
-
 ## Usage
 
 ```bash
 make docker-up
 ```
 
-The gateway comes up at `http://localhost:8080`. Verify it is healthy:
-
-```bash
-curl http://localhost:8080/health
-```
-
-Connect an MCP client (e.g. Claude Desktop) to the unified endpoint:
+The gateway comes up at **http://localhost:8080**. Connect an MCP client (e.g.
+Claude Desktop) to the unified endpoint:
 
 ```json
 {
@@ -50,6 +31,42 @@ Connect an MCP client (e.g. Claude Desktop) to the unified endpoint:
 }
 ```
 
+<details>
+<summary>API examples</summary>
+
+Install the CLI locally (`brew install mcpjungle/mcpjungle/mcpjungle`) and point
+it at the gateway, or run it inside the container:
+
+```bash
+# Register a remote streamable-HTTP server
+mcpjungle register --name context7 --url https://mcp.context7.com/mcp
+
+# Register from a JSON config file
+mcpjungle register -c ./calculator.json
+
+# Inspect and call tools (canonical name is <server>__<tool>)
+mcpjungle list tools
+mcpjungle invoke calculator__multiply --input '{"a": 100, "b": 50}'
+mcpjungle deregister calculator
+
+# Without the local CLI, run it inside the container
+docker compose exec mcpjungle /mcpjungle list tools
+```
+
+</details>
+
+> The host working directory is mounted read-only at `/host` so filesystem-based
+> MCP servers can be registered against a path under `/host`. Postgres publishes
+> on `127.0.0.1:5432`; several ysandbox stacks do the same, so remap one with a
+> gitignored `docker-compose.override.yml` (`ports: !override`) to run two at once.
+
+## Services
+
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **mcpjungle** | `8080` | MCP gateway (`/mcp`), HTTP API, health (`/health`), metrics (`/metrics`) |
+| **postgres** | `127.0.0.1:5432` | PostgreSQL `17` — registered servers, tools, groups, state |
+
 ## Configuration
 
 Environment variables in `.env` (sandbox-safe defaults):
@@ -58,7 +75,7 @@ Environment variables in `.env` (sandbox-safe defaults):
 |----------|---------|-------|
 | `SERVER_MODE` | `development` | `development` (local, no auth) or `enterprise` (auth + ACLs) |
 | `HOST_PORT` | `8080` | Host port mapped to the gateway |
-| `MCPJUNGLE_IMAGE_TAG` | `latest-stdio` | `latest-stdio` bundles `npx`/`uvx` for stdio MCP servers; `latest` is minimal |
+| `MCPJUNGLE_IMAGE_TAG` | `latest-stdio` | `latest-stdio` bundles `npx`/`uvx` for stdio servers; `latest` is minimal |
 | `OTEL_ENABLED` | `false` | Prometheus-compatible metrics at `/metrics` |
 | `MCP_SERVER_INIT_REQ_TIMEOUT_SEC` | `10` | Init request timeout for upstream MCP servers |
 | `POSTGRES_USER` | `mcpjungle` | Database user |
@@ -66,51 +83,22 @@ Environment variables in `.env` (sandbox-safe defaults):
 | `POSTGRES_DB` | `mcpjungle` | Database name |
 
 The server connects to Postgres via `DATABASE_URL`
-(`postgres://mcpjungle:mcpjungle@postgres:5432/mcpjungle`). Postgres data
-persists to `.docker/postgres` (gitignored). The host working directory is
-mounted read-only at `/host` so filesystem-based MCP servers can be registered
-against a path under `/host`.
+(`postgres://mcpjungle:mcpjungle@postgres:5432/mcpjungle`).
 
-## Registering an MCP server
+## Volumes
 
-Install the `mcpjungle` CLI locally (`brew install mcpjungle/mcpjungle/mcpjungle`)
-and point it at the gateway, or use the HTTP API directly.
+| Path | Contents |
+|------|----------|
+| `.docker/postgres/` | PostgreSQL data (registered servers, tools, groups) |
 
-**Remote / streamable-HTTP server (via CLI):**
+## Observability
 
-```bash
-mcpjungle register --name context7 --url https://mcp.context7.com/mcp
-```
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Health | `curl http://localhost:8080/health` |
+| Metrics | `http://localhost:8080/metrics` (when `OTEL_ENABLED=true`) |
+| Logs | `docker compose logs -f mcpjungle` |
 
-**From a JSON config file:**
-
-```bash
-cat > calculator.json <<'JSON'
-{
-  "name": "calculator",
-  "transport": "streamable_http",
-  "description": "Basic math tools",
-  "url": "http://host.docker.internal:8000/mcp"
-}
-JSON
-
-mcpjungle register -c ./calculator.json
-```
-
-**Inspect and call tools** (canonical name is `<server>__<tool>`):
-
-```bash
-mcpjungle list tools
-mcpjungle invoke calculator__multiply --input '{"a": 100, "b": 50}'
-mcpjungle deregister calculator
-```
-
-If you did not install the CLI, you can also run it inside the container:
-
-```bash
-docker compose exec mcpjungle /mcpjungle list tools
-```
-
-## Links
+## Resources
 
 - GitHub: https://github.com/mcpjungle/MCPJungle

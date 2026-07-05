@@ -1,73 +1,72 @@
 # Skyvern
 
+AI-powered browser automation platform that automates complex workflows on any
+website using natural-language instructions. Ships an API server, a web UI, and
+a PostgreSQL backing store.
+
 ![skyvern](docs/dashboard.png)
 
-Skyvern is an AI-powered browser automation platform that allows you to automate complex workflows on any website using natural language instructions.
+## Usage
+
+```bash
+make docker-up
+```
+
+Open the UI at http://localhost:8080 (`/discover`). Verify the API with
+`curl http://localhost:8000/api/v1/heartbeat` → `Server is running.`
+
+> Boots cleanly with `make docker-up` — no config changes needed. On first boot
+> Postgres initialises and `skyvern` runs DB migrations; the `skyvern` healthcheck
+> waits for `/app/.streamlit/secrets.toml` (mounted from `.streamlit/`, which ships
+> a pre-seeded org `Skyvern` + backend JWT credential), so the stack is usually
+> healthy within ~30s.
+>
+> First load may show a **"Frontend API key missing"** notice — the compose ships a
+> placeholder `VITE_SKYVERN_API_KEY=YOUR_API_KEY`. Click **Regenerate API key** in
+> the UI to persist a working key. Set a real `GEMINI_API_KEY` (and
+> `VITE_SKYVERN_API_KEY`) in `docker-compose.yml` before running actual automation
+> tasks with an LLM.
 
 ## Services
 
-- **postgres**: PostgreSQL 14 database for storing Skyvern data
-- **skyvern**: Main Skyvern application with browser automation capabilities
-- **skyvern-ui**: Web interface for managing and monitoring Skyvern workflows
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **skyvern-ui** | `8080`, `9090` | Web interface (`8080`) and artifact server (`9090`) |
+| **skyvern** | `8000`, `9222` | API server (`8000`) and Chrome DevTools Protocol for CDP browser forwarding (`9222`) |
+| **postgres** | `5432` | PostgreSQL 14 database |
 
-## Ports
+## Configuration
 
-- `5432`: PostgreSQL database
-- `8000`: Skyvern API server
-- `8080`: Skyvern web UI
-- `9090`: Artifact server
+Environment variables set in `docker-compose.yml` (sandbox-safe defaults):
 
-## Setup
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `GEMINI_API_KEY` | `YOUR_GEMINI_KEY` | LLM key; **change** to run real automation |
+| `LLM_KEY` | `GEMINI_2.5_FLASH_PREVIEW` | Selected LLM model |
+| `BROWSER_TYPE` | `chromium-headful` | Browser mode |
+| `MAX_STEPS_PER_RUN` | `50` | Step cap per automation run |
+| `VITE_SKYVERN_API_KEY` | `YOUR_API_KEY` | Frontend API key; **change** (or regenerate in UI) |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` | `skyvern` / `skyvern` | DB credentials; **change** for real use |
 
-1. Set your Gemini API key in the docker-compose.yml:
-   ```yaml
-   GEMINI_API_KEY=YOUR_GEMINI_KEY
-   ```
+## Volumes
 
-2. Set your Skyvern API key in the UI environment:
-   ```yaml
-   VITE_SKYVERN_API_KEY=YOUR_API_KEY
-   ```
+| Path | Contents |
+|------|----------|
+| `.docker/postgres/` | PostgreSQL data |
+| `.docker/artifacts/` | Run artifacts |
+| `.docker/videos/` | Recorded run videos |
+| `.docker/har/` | HAR network captures |
+| `.docker/log/` | Application logs |
 
-3. Start the services:
-   ```bash
-   docker compose up -d
-   ```
+## Observability
 
-## Access
+| Check | Endpoint / Command |
+|-------|--------------------|
+| API heartbeat | `curl http://localhost:8000/api/v1/heartbeat` |
+| DB health | `docker compose exec postgres pg_isready -U skyvern` |
+| Logs | `docker compose logs -f skyvern` |
 
-- Skyvern UI: http://localhost:8080
-- Skyvern API: http://localhost:8000
-- PostgreSQL: localhost:5432
+## Resources
 
-## Running
-
-```bash
-docker compose up -d
-```
-
-Ports:
-
-- `8080`: Skyvern web UI (the target dashboard, `/discover`)
-- `8000`: Skyvern API server (`GET /api/v1/heartbeat` → `Server is running.`)
-- `9222`: Chrome DevTools Protocol (CDP) for browser forwarding
-- `9090`: Artifact server
-- `5432`: PostgreSQL
-
-## Notes
-
-- Boots cleanly with plain `docker compose up -d` — no config changes needed.
-  On first boot Postgres initialises and the `skyvern` container runs DB
-  migrations; the `skyvern` healthcheck waits for `/app/.streamlit/secrets.toml`
-  (mounted from `.streamlit/`, which ships a pre-seeded org + backend API key),
-  so the whole stack is usually healthy within ~30s.
-- The UI is served immediately (HTTP 200 on :8080); allow a few extra seconds
-  for the API heartbeat to turn 200 while the app finishes starting.
-- The `.streamlit/secrets.toml` in this stack already contains a seeded
-  organization (`Skyvern`) and JWT credential, so no manual org bootstrap is
-  needed.
-- First load may show a **"Frontend API key missing"** notice — the compose
-  ships a placeholder `VITE_SKYVERN_API_KEY=YOUR_API_KEY`. Click **Regenerate
-  API key** in the UI and it persists a working key automatically. Set a real
-  `GEMINI_API_KEY` (and `VITE_SKYVERN_API_KEY`) in `docker-compose.yml` before
-  running actual automation tasks with an LLM.
+- GitHub: https://github.com/Skyvern-AI/skyvern
+- Docs: https://docs.skyvern.com

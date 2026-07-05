@@ -1,17 +1,10 @@
 # Phoenix
 
+Open-source LLM observability platform by Arize — tracing, evals, and a UI for
+inspecting LLM application runs via OpenTelemetry. Traces are received over OTLP
+and stored in PostgreSQL.
+
 ![phoenix](docs/dashboard.png)
-
-Open-source LLM observability platform by Arize. Provides tracing, evals, and a UI for inspecting LLM application runs via OpenTelemetry.
-
-## Services
-
-- **phoenix**: Phoenix server with OTLP collector and web UI
-
-## Ports
-
-- `6006`: Phoenix web UI
-- `4317`: OpenTelemetry gRPC collector (OTLP)
 
 ## Usage
 
@@ -19,9 +12,15 @@ Open-source LLM observability platform by Arize. Provides tracing, evals, and a 
 make docker-up
 ```
 
-Access the UI at http://localhost:6006
+Open the UI at http://localhost:6006. Point your app's OTLP exporter at
+`http://localhost:4317` (gRPC) and traces appear under the matching project.
 
-## Sending Traces
+> The dashboard opens with **no authentication** by default — `PHOENIX_ENABLE_AUTH`
+> is not set. The `PHOENIX_DEFAULT_ADMIN_INITIAL_PASSWORD` seed (`admin`) only
+> applies once you set `PHOENIX_ENABLE_AUTH=true` (plus a `PHOENIX_SECRET`), after
+> which you log in as `admin@localhost` with that password.
+
+<details><summary>Sending traces</summary>
 
 Install the SDK in your Python project:
 
@@ -29,7 +28,7 @@ Install the SDK in your Python project:
 pip install arize-phoenix-otel opentelemetry-sdk
 ```
 
-Configure your app to send traces:
+Register a tracer provider:
 
 ```python
 from phoenix.otel import register
@@ -47,33 +46,41 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 ```
 
-## Running
+</details>
 
-```bash
-docker compose up -d
-```
+## Services
 
-- **UI:** http://localhost:6006
-- **OTLP gRPC collector:** http://localhost:4317
-
-The dashboard opens with **no authentication** by default — `PHOENIX_ENABLE_AUTH`
-is not set in the compose, so you land straight on the Projects / Traces view.
-Point your app's OTLP exporter at port 4317 (see above) and traces appear under
-the matching project.
-
-## Notes
-
-- Auth is off even though `PHOENIX_DEFAULT_ADMIN_INITIAL_PASSWORD` (`admin`) is
-  provided — that seed only applies once you enable auth by setting
-  `PHOENIX_ENABLE_AUTH=true` (plus a `PHOENIX_SECRET`), after which you log in as
-  `admin@localhost` with that password.
-- Trace data persists in Postgres (`.docker/postgres/`); the Phoenix working dir
-  in `.docker/phoenix/`.
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **phoenix** | `6006`, `4317` | Phoenix server + web UI (`6006`) and OTLP gRPC collector (`4317`) |
+| **db** | — | PostgreSQL 16 backing store for trace data |
 
 ## Configuration
 
-Key settings in `.env`:
+Environment variables in `.env` (sandbox-safe defaults):
 
-- `PHOENIX_WORKING_DIR`: Path for persisted trace data (default: `/mnt/data`)
-- `PHOENIX_SECRET` / `PHOENIX_ENABLE_AUTH`: Enable authentication
-- Data is persisted in `.docker/data/`
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `POSTGRES_PASSWORD` | `phoenix` | Postgres password; **change** for real use |
+| `PHOENIX_ADMIN_PASSWORD` | `admin` | Seeds the initial admin password (only used once auth is enabled) |
+| `PHOENIX_TELEMETRY_ENABLED` | `false` | Upstream product telemetry |
+| `PHOENIX_WORKING_DIR` | `/mnt/data` | Container path for persisted working data |
+
+## Volumes
+
+| Path | Contents |
+|------|----------|
+| `.docker/phoenix/` | Phoenix working directory |
+| `.docker/postgres/` | PostgreSQL data (trace store) |
+
+## Observability
+
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Health | `curl http://localhost:6006/healthz` |
+| Logs | `docker compose logs -f phoenix` |
+
+## Resources
+
+- GitHub: https://github.com/Arize-ai/phoenix
+- Docs: https://arize.com/docs/phoenix

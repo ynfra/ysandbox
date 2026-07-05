@@ -1,73 +1,73 @@
 # Neko Browser
 
-![neko-browser](docs/dashboard.png)
+Neko streams a remote Chromium desktop to your browser over WebRTC, with a
+virtual display and shared multi-user control. Useful for interactive remote
+browsing or as a base for CDP-driven automation against the exposed Chrome
+DevTools Protocol port.
 
-Browser automation setup using Neko (remote browser) with Playwright for testing and automation.
+![Neko Browser](docs/dashboard.png)
 
-## Services
-
-- **neko**: Remote Chrome browser with WebRTC streaming capabilities
-
-## Ports
-
-- `8080`: Neko browser interface
-- `9223`: Chrome DevTools Protocol
-- `56000-56100/udp`: WebRTC streaming
-
-## Setup
-
-1. Start the services:
-   ```bash
-   make docker-up
-   # docker compose up -d
-   ```
-
-2. Install Playwright dependencies:
-   ```bash
-   make install
-   # npm install
-   # npx playwright install
-   ```
-
-3. Run tests:
-   ```bash
-   make test
-   # npx playwright test
-   ```
-
-## Access
-
-- Neko Browser: http://localhost:8080
-- Admin: `neko` / `admin`
-
-## Running
+## Usage
 
 ```bash
-docker compose up -d
+make docker-up
 ```
 
-- Web UI: http://localhost:8080 — enter a display name and connect.
-- User password: `neko` (`NEKO_MEMBER_MULTIUSER_USER_PASSWORD`)
-- Admin password: `admin` (`NEKO_MEMBER_MULTIUSER_ADMIN_PASSWORD`)
-- The desktop and Chromium stream to the browser over WebRTC; first frame
-  appears a few seconds after connecting.
+- Open <http://localhost:8080> and connect with a display name plus a password.
+  - **User:** `neko` (from `NEKO_MEMBER_MULTIUSER_USER_PASSWORD`)
+  - **Admin:** `admin` (from `NEKO_MEMBER_MULTIUSER_ADMIN_PASSWORD`)
+- The desktop and Chromium stream over WebRTC; the first frame appears a few
+  seconds after connecting.
+- Chrome DevTools Protocol is published on port `9223` for CDP-based automation
+  (e.g. `chromium.connectOverCDP('http://0.0.0.0:9223')`).
 
 Bring the stack down with `docker compose down`.
 
-## Notes
+> **`NEKO_CHROME_FLAGS` is required.** The image's supervisord `chromium.conf`
+> interpolates `%(ENV_NEKO_CHROME_FLAGS)s`. If unset, supervisord fails to
+> expand the format string and Chromium crash-loops (the container stays in
+> `Restarting` and port 8080 never binds). It is defined (empty) in
+> `docker-compose.yml`; append extra Chromium flags there if needed.
+>
+> **Port clash.** Host port 8080 is shared with other ysandbox stacks. To run
+> two at once, add a gitignored `docker-compose.override.yml` remapping the
+> published port with `ports: !override` — do not commit it.
 
-- **WebRTC transport.** `NEKO_WEBRTC_EPR=56000-56100` publishes the UDP media
-  port range (mapped `56000-56100:56000-56100/udp`), and
-  `NEKO_WEBRTC_NAT1TO1=127.0.0.1` advertises the local host as the ICE
-  candidate for local access. `NEKO_WEBRTC_ICELITE=1` runs Neko as an
-  ICE-lite peer. For remote access, set `NEKO_WEBRTC_NAT1TO1` to the host's
-  reachable IP and open the UDP range.
-- **`NEKO_CHROME_FLAGS` is required.** The image's supervisord `chromium.conf`
-  interpolates `%(ENV_NEKO_CHROME_FLAGS)s` into the Chromium launch command.
-  If the variable is unset, supervisord fails to expand the format string and
-  Chromium crash-loops (the container stays in `Restarting` and port 8080
-  never binds). It is defined (empty) in `docker-compose.yml`; append extra
-  Chromium flags there if needed.
-- **Port clash.** Host port 8080 is shared with other ysandbox stacks. To run
-  two at once, add a gitignored `docker-compose.override.yml` remapping the
-  published port with `ports: !override` — do not commit it.
+## Services
+
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **neko** | `8080` (UI), `9223` (CDP), `56000-56100/udp` (WebRTC) | Remote Chromium desktop with WebRTC streaming |
+
+## Configuration
+
+Environment variables in `docker-compose.yml` (sandbox-safe defaults):
+
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `NEKO_DESKTOP_SCREEN` | `1920x1080@30` | Virtual display resolution and refresh rate |
+| `NEKO_MEMBER_MULTIUSER_USER_PASSWORD` | `neko` | Regular-user room password — **change** |
+| `NEKO_MEMBER_MULTIUSER_ADMIN_PASSWORD` | `admin` | Admin room password — **change** |
+| `NEKO_WEBRTC_EPR` | `56000-56100` | WebRTC UDP media port range |
+| `NEKO_WEBRTC_NAT1TO1` | `127.0.0.1` | Advertised ICE candidate; set to host's reachable IP for remote access |
+| `NEKO_WEBRTC_ICELITE` | `1` | Run Neko as an ICE-lite peer |
+| `NEKO_DESKTOP_UNMINIMIZE` | `true` | Auto-unminimize windows |
+| `NEKO_DESKTOP_UPLOAD_DROP` | `true` | Allow drag-and-drop file upload |
+| `NEKO_CHROME_FLAGS` | `""` | Extra Chromium flags (must stay defined — see note above) |
+
+## Volumes
+
+| Path | Contents |
+|------|----------|
+| `.docker/chrome/` | Chromium profile / config |
+
+## Observability
+
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Logs | `docker compose logs -f neko` |
+
+## Resources
+
+- GitHub: https://github.com/m1k1o/neko
+- Docs: https://neko.m1k1o.net/

@@ -1,16 +1,11 @@
 # Apache Tika
 
+Content detection and extraction toolkit. Extracts text, metadata, and
+structured content from over 1000 file formats. API-first — the root `/` page
+is a static welcome/endpoint listing; real work is done by PUT/POST-ing files
+to endpoints like `/tika`, `/meta`, and `/detect/stream`.
+
 ![tika](docs/dashboard.png)
-
-Content detection and extraction toolkit. Extracts text, metadata, and structured content from over 1000 file formats.
-
-## Services
-
-- **tika**: Apache Tika server
-
-## Ports
-
-- `9998`: Tika API endpoint
 
 ## Usage
 
@@ -18,15 +13,27 @@ Content detection and extraction toolkit. Extracts text, metadata, and structure
 make docker-up
 ```
 
-## Examples
+Hit the server at http://localhost:9998/ — the root serves a "Welcome to the
+Apache Tika Server" page listing all endpoints. Sample extraction:
 
-Extract text from a document:
+```bash
+curl -T file.pdf http://localhost:9998/tika
+```
+
+> Boots quickly and returns HTTP 200 on `/` within a few seconds — no config or
+> persistent state required. Default host port is `9998`; if it clashes with
+> another running stack, remap via a gitignored `docker-compose.override.yml`
+> (`ports: !override`).
+
+<details><summary>API examples</summary>
+
+Extract plain text from a document:
 
 ```bash
 curl -T document.pdf http://localhost:9998/tika --header "Accept: text/plain"
 ```
 
-Extract metadata:
+Extract metadata as JSON:
 
 ```bash
 curl -T document.pdf http://localhost:9998/meta --header "Accept: application/json"
@@ -38,35 +45,30 @@ Detect file type:
 curl -T document.pdf http://localhost:9998/detect/stream
 ```
 
-## Running
+</details>
 
-```bash
-docker compose up -d
-```
+## Services
 
-Then hit the server at http://localhost:9998/ — the root serves a "Welcome to
-the Apache Tika Server" HTML page listing all endpoints (this is what the
-screenshot above shows).
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **tika** | `9998` | Apache Tika server (REST content detection/extraction) |
 
-Sample extraction:
+## Configuration
 
-```bash
-curl -T file.pdf http://localhost:9998/tika
-```
+None — no environment variables; runs with image defaults.
 
-Bring the stack down with:
+## Volumes
 
-```bash
-docker compose down
-```
+None — stateless.
 
-## Notes
+## Observability
 
-- **API-first.** Tika is a REST server, not a web app. The root `/` page is a
-  static welcome/endpoint listing (captured in the screenshot); real work is
-  done by PUT/POST-ing files to endpoints like `/tika`, `/meta`, and
-  `/detect/stream`.
-- Boots quickly and returns HTTP 200 on `/` within a few seconds — no config
-  or persistent state required.
-- Default host port is `9998`. If it clashes with another running stack, add a
-  gitignored `docker-compose.override.yml` remapping it (`ports: !override`).
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Health | `curl -s -o /dev/null -w "%{http_code}" http://localhost:9998/` (200 when up) |
+| Logs | `docker compose logs -f tika` |
+
+## Resources
+
+- GitHub: https://github.com/apache/tika
+- Docs: https://tika.apache.org/

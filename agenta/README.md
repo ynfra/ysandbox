@@ -4,62 +4,18 @@ Open-source LLM engineering platform — prompt playground, side-by-side testing
 
 ![Agenta workspace](docs/workspace.png)
 
-## Services
-
-| Service | Description |
-|---------|-------------|
-| **traefik** | Reverse proxy routing `/api`, `/services`, `/` paths |
-| **web** | Next.js web UI |
-| **api** | FastAPI/Gunicorn backend (routes via `/api`) |
-| **alembic** | One-time database migration runner (init container) |
-| **worker-evaluations** | Celery worker — evaluation jobs |
-| **worker-tracing** | Celery worker — trace processing |
-| **worker-webhooks** | Celery worker — webhook delivery |
-| **worker-events** | Celery worker — event processing |
-| **cron** | Scheduled jobs (supercronic) |
-| **services** | Additional services layer (routes via `/services`) |
-| **supertokens** | Auth service (SuperTokens + PostgreSQL) |
-| **postgres** | PostgreSQL 17 (agenta + supertokens databases) |
-| **redis-volatile** | Redis (LRU eviction) — Celery broker + cache |
-| **redis-durable** | Redis (AOF persistence) — Celery results |
-
-## Ports
-
-| Port | Service |
-|------|---------|
-| `8081` | Web UI (via Traefik) |
-| `8082` | Traefik dashboard (localhost-only) |
-| `6381` | Redis durable (localhost-only) |
-
-> Port `8081` is configurable via `AGENTA_PORT` in `.env`.
-
 ## Usage
 
 ```bash
 make docker-up
 ```
 
-Open http://localhost:8081 — create an account on first visit.
+Open http://localhost:8081 and create an account on first visit.
 
-> **Note:** First startup runs database migrations (`alembic` container). Allow 1–2 minutes for all services to become ready.
+> First startup runs database migrations (the one-time `alembic` init container) before the API comes up. Allow 1–2 minutes for all services to become ready. The web entrypoint bakes the **public** URL (`AGENTA_API_URL`, default `http://localhost:8081/api`) into a browser-loaded `/__env.js`; if you change `AGENTA_PORT`, update these public URL vars too or browser auth will fail.
 
-## Configuration
-
-Key environment variables in `.env`:
-
-| Variable | Default | Notes |
-|----------|---------|-------|
-| `AGENTA_AUTH_KEY` | `changeme-...` | Auth signing key — **change in production** |
-| `AGENTA_CRYPT_KEY` | `changeme-...` | Encryption key — **change in production** |
-| `POSTGRES_PASSWORD` | `agenta` | PostgreSQL password |
-| `AGENTA_PORT` | `8081` | External port for the UI |
-
-Generate secure keys:
-```bash
-openssl rand -hex 32
-```
-
-## SDK Integration
+<details>
+<summary>SDK integration</summary>
 
 **Python:**
 ```python
@@ -84,3 +40,58 @@ from agenta.sdk.tracing.integrations.langchain import AgentaCallbackHandler
 handler = AgentaCallbackHandler()
 chain.invoke({"input": "..."}, config={"callbacks": [handler]})
 ```
+</details>
+
+## Services
+
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **traefik** | `8081` (UI via `/`), `127.0.0.1:8082` (dashboard) | Reverse proxy routing `/api`, `/services`, `/` paths |
+| **web** | — | Next.js web UI (served through Traefik) |
+| **api** | — | FastAPI/Gunicorn backend (routes via `/api`) |
+| **services** | — | Additional services layer (routes via `/services`) |
+| **alembic** | — | One-time database migration runner (init container) |
+| **worker-evaluations** | — | Celery worker — evaluation jobs |
+| **worker-tracing** | — | Celery worker — trace processing |
+| **worker-webhooks** | — | Celery worker — webhook delivery |
+| **worker-events** | — | Celery worker — event processing |
+| **cron** | — | Scheduled jobs (supercronic) |
+| **supertokens** | — | Auth service (SuperTokens + PostgreSQL) |
+| **postgres** | — | PostgreSQL 17 (agenta + supertokens databases) |
+| **redis-volatile** | — | Redis (LRU eviction) — Celery broker + cache |
+| **redis-durable** | `127.0.0.1:6381` | Redis (AOF persistence) — Celery results |
+
+## Configuration
+
+Environment variables in `.env` (sandbox-safe defaults):
+
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `AGENTA_AUTH_KEY` | `changeme-auth-key-32-chars-minimum` | Auth signing key — **change** for real use |
+| `AGENTA_CRYPT_KEY` | `changeme-crypt-key-32-chars-min` | Encryption key — **change** for real use |
+| `POSTGRES_USER` | `agenta` | PostgreSQL user |
+| `POSTGRES_PASSWORD` | `agenta` | PostgreSQL password — **change** for real use |
+| `AGENTA_PORT` | `8081` | External port for the UI (via Traefik) |
+
+Generate secure keys with `openssl rand -hex 32`.
+
+## Volumes
+
+| Path | Contents |
+|------|----------|
+| `.docker/postgres/` | PostgreSQL data (agenta + supertokens) |
+| `.docker/redis-volatile/` | Redis broker/cache state |
+| `.docker/redis-durable/` | Redis (AOF) Celery results |
+
+## Observability
+
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Traefik dashboard | `http://localhost:8082` (localhost-only) |
+| Service health | `docker compose ps` (postgres/redis have Compose healthchecks) |
+| Logs | `docker compose logs -f api` |
+
+## Resources
+
+- GitHub: https://github.com/agenta-ai/agenta
+- Docs: https://docs.agenta.ai

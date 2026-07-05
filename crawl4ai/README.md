@@ -1,16 +1,8 @@
 # Crawl4AI
 
-![crawl4ai](docs/dashboard.png)
+AI-powered web crawler and scraper with built-in headless Chromium. Extracts structured data from websites using LLM-based extraction strategies, exposed over an HTTP API with an interactive playground.
 
-AI-powered web crawler and scraper with built-in browser automation. Extracts structured data from websites using LLM-based extraction strategies.
-
-## Services
-
-- **crawl4ai**: Crawl4AI server with headless Chromium
-
-## Ports
-
-- `11235`: Crawl4AI API endpoint
+![Crawl4AI dashboard](docs/dashboard.png)
 
 ## Usage
 
@@ -18,44 +10,18 @@ AI-powered web crawler and scraper with built-in browser automation. Extracts st
 make docker-up
 ```
 
-## Running
+Reach it at:
 
-```bash
-docker compose up -d
-```
+- **API**: http://localhost:11235 (health at `/health`)
+- **Playground UI**: http://localhost:11235/playground — build/run requests, inspect the JSON response, copy the equivalent Python/cURL
+- **API docs**: http://localhost:11235/docs
 
-- API: <http://localhost:11235> (health at `/health`)
-- Interactive **playground** UI: <http://localhost:11235/playground> — build/run
-  requests, inspect the JSON response, and copy the equivalent Python/cURL.
-- API docs: <http://localhost:11235/docs>
+The image is large (multi-GB); first `docker compose up -d` pulls it and boot takes a minute or two while the browser pool warms up.
 
-The image is large (multi-GB); first `docker compose up -d` pulls it and boot
-takes a minute or two while the browser pool warms up.
+> **Loopback-by-default bind (boot gotcha).** crawl4ai ≥ 0.9.0 binds gunicorn to `127.0.0.1` unless a credential is set, so the published port `11235` is dead otherwise. This stack sets a sandbox-safe `CRAWL4AI_API_TOKEN` (default `crawl4ai-sandbox`) so the API is reachable and authenticated. Every request (including `/playground` and its assets) must carry the token as a bearer header — only `/health` and `/token` are public. The container reports `healthy` from its internal `/health` probe even while the host port is unreachable; check for `Listening at: http://[::]:11235` (not `127.0.0.1`) in the logs to confirm the host-facing bind.
 
-Every request (including the `/playground` UI and its assets) must carry the
-API token as a bearer header — only `/health` and `/token` are public:
-
-```bash
-curl -X POST http://localhost:11235/crawl \
-    -H "Authorization: Bearer ${CRAWL4AI_API_TOKEN:-crawl4ai-sandbox}" \
-    -H "Content-Type: application/json" \
-    -d '{"urls": ["https://example.com"]}'
-```
-
-## Notes
-
-- **Loopback-by-default bind (boot gotcha).** crawl4ai ≥ 0.9.0 refuses to
-  expose the API on non-loopback interfaces without a credential — its
-  `entrypoint.sh` binds gunicorn to `127.0.0.1` unless `CRAWL4AI_API_TOKEN`
-  (or JWT) is set, so the published host port `11235` is dead otherwise. This
-  stack sets a sandbox-safe `CRAWL4AI_API_TOKEN` (default `crawl4ai-sandbox`)
-  so `docker compose up -d` yields a reachable, authenticated API. Override it
-  via env for anything exposed off-host.
-- The container reports `healthy` from its internal `/health` probe even while
-  the host port is unreachable — check `Listening at: http://[::]:11235` (not
-  `127.0.0.1`) in `docker compose logs` to confirm the host-facing bind.
-
-## Examples
+<details>
+<summary>API examples</summary>
 
 Basic crawl:
 
@@ -65,13 +31,36 @@ curl -X POST http://localhost:11235/crawl \
     -H "Content-Type: application/json" \
     -d '{"urls": ["https://example.com"]}'
 ```
+</details>
+
+## Services
+
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **crawl4ai** | `11235` | Crawl4AI server with headless Chromium (4 GB mem limit, 1 GB shared memory) |
 
 ## Configuration
 
-Optional LLM API keys for AI-powered extraction (set in environment or `.env`):
+Environment variables (sandbox-safe defaults; set in environment or `.env`):
 
-- `CRAWL4AI_API_TOKEN`: bearer token required by all API endpoints (default `crawl4ai-sandbox`)
-- `OPENAI_API_KEY`: OpenAI API key
-- `ANTHROPIC_API_KEY`: Anthropic API key
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `CRAWL4AI_API_TOKEN` | `crawl4ai-sandbox` | Bearer token required by all API endpoints — **change** for anything exposed off-host |
+| `OPENAI_API_KEY` | *(unset)* | OpenAI key for LLM-based extraction |
+| `ANTHROPIC_API_KEY` | *(unset)* | Anthropic key for LLM-based extraction |
 
-Resource limits: 4GB memory limit, 1GB shared memory for Chromium.
+## Volumes
+
+None — stateless (`/dev/shm` is bind-mounted for Chromium shared memory, not persistence).
+
+## Observability
+
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Health | `curl http://localhost:11235/health` (Compose healthcheck probes the same) |
+| Logs | `docker compose logs -f crawl4ai` |
+
+## Resources
+
+- GitHub: https://github.com/unclecode/crawl4ai
+- Docs: https://docs.crawl4ai.com

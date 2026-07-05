@@ -1,61 +1,72 @@
 # Metabase Multi
 
-![metabase-multi](docs/dashboard.png)
+Two fully independent Metabase instances, each backed by its own dedicated
+PostgreSQL database. Useful for testing multi-tenant or side-by-side
+configurations where two BI apps must not share application metadata.
 
-A multi-instance Metabase setup with two independent Metabase instances, each backed by its own PostgreSQL database for testing and development scenarios.
+![Metabase Multi dashboard](docs/dashboard.png)
 
-## Services
-
-- **metabase1**: First Metabase instance connected to postgres1
-- **postgres1**: PostgreSQL database for metabase1
-- **metabase2**: Second Metabase instance connected to postgres2  
-- **postgres2**: PostgreSQL database for metabase2
-
-## Ports
-
-- `3001`: Metabase instance 1 web interface
-- `3002`: Metabase instance 2 web interface
-
-## Running
+## Usage
 
 ```bash
-docker compose up -d
+make docker-up
 ```
 
-Each Metabase instance is a Clojure application that runs database migrations on
-first boot, so give it up to a few minutes to become healthy. Poll readiness with:
+Each Metabase instance is a Clojure application that runs database migrations
+on first boot, so allow up to a few minutes to become healthy:
+
+- Instance 1: <http://localhost:3001>
+- Instance 2: <http://localhost:3002>
+
+On first launch each instance shows an interactive setup wizard (choose a
+language, create the admin account, connect a database or use the bundled
+sample data). The two instances are independent — run the wizard separately
+for each. Poll readiness with:
 
 ```bash
 curl -sf -o /dev/null -w '%{http_code}' http://localhost:3001/api/health   # 200 when ready
 ```
 
-- Instance 1: <http://localhost:3001>
-- Instance 2: <http://localhost:3002>
+## Services
 
-Each instance has its **own dedicated PostgreSQL** database (`postgres1` /
-`postgres2`) for storing its application metadata — they are fully independent.
-
-### First-run setup wizard
-
-On first launch, each Metabase instance shows an interactive setup wizard that
-must be completed in the browser: choose a language, create the admin account,
-and either connect a database or continue with the bundled sample data. The
-screenshot above shows the Home page of instance 1 after completing the wizard
-(admin `admin@metabase.local`, using the built-in sample data). Instance 2 is
-independent and needs its own wizard run at <http://localhost:3002>.
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **metabase1** | `3001` | First Metabase instance (metadata in `postgres1`) |
+| **postgres1** | — | PostgreSQL 17 for metabase1 application data |
+| **metabase2** | `3002` | Second Metabase instance (metadata in `postgres2`) |
+| **postgres2** | — | PostgreSQL 17 for metabase2 application data |
 
 ## Configuration
 
-Each Metabase instance has its own database configuration:
+Environment variables set in `docker-compose.yml` (sandbox-safe defaults):
 
-**Instance 1:**
-- Database: `metabase1`
-- User: `metabase1`
-- Password: `metabase1`
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `MB_DB_TYPE` | `postgres` | Metabase application database driver |
+| `MB_DB_HOST` | `postgres1` / `postgres2` | Metadata database host |
+| `MB_DB_DBNAME` | `metabase1` / `metabase2` | Metadata database name |
+| `MB_DB_USER` | `metabase1` / `metabase2` | Database user — **change** for real use |
+| `MB_DB_PASS` | `metabase1` / `metabase2` | Database password — **change** for real use |
+| `POSTGRES_USER` | `metabase1` / `metabase2` | Postgres role (matches `MB_DB_USER`) |
+| `POSTGRES_PASSWORD` | `metabase1` / `metabase2` | Postgres password — **change** for real use |
+| `POSTGRES_DB` | `metabase1` / `metabase2` | Postgres database (matches `MB_DB_DBNAME`) |
 
-**Instance 2:**
-- Database: `metabase2`
-- User: `metabase2` 
-- Password: `metabase2`
+## Volumes
 
-Both instances include health checks and are accessible at their respective ports for independent testing and development.
+| Path | Contents |
+|------|----------|
+| `.docker/postgres1/` | PostgreSQL data for metabase1 |
+| `.docker/postgres2/` | PostgreSQL data for metabase2 |
+
+## Observability
+
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Health (instance 1) | `curl -I http://localhost:3001/api/health` |
+| Health (instance 2) | `curl -I http://localhost:3002/api/health` |
+| Logs | `docker compose logs -f metabase1` |
+
+## Resources
+
+- GitHub: https://github.com/metabase/metabase
+- Docs: https://www.metabase.com/docs/latest/

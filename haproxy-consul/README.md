@@ -1,58 +1,71 @@
 # HAProxy with Consul Service Discovery
 
+HAProxy load-balancing in front of a scaled Bun.js app, with Consul providing
+DNS-based service discovery and Registrator auto-registering container instances
+from Docker events. HAProxy's `server-template` backend resolves the
+`_app._tcp.service.consul` SRV records through Consul's DNS and updates its
+backend servers dynamically as replicas come and go.
+
 ![haproxy-consul](docs/dashboard.png)
 
-This example demonstrates HAProxy load balancing with Consul service discovery using Docker Compose and Registrator for automatic service registration.
+## Usage
+
+```bash
+make docker-up
+```
+
+- **App (via HAProxy):** http://localhost:8080 — round-robins across the three
+  `app` replicas.
+- **HAProxy stats:** http://localhost:8404/stats — note this is on port **8404**,
+  not 8080.
+- **Consul UI:** http://localhost:8500/ui — the services list shows `consul`
+  plus `app` (3 instances registered by Registrator via the Docker socket).
+
+Consul runs in `-dev` mode, so its state is ephemeral and not persisted between
+runs. Registrator uses `-internal`, registering each container's internal
+`:3000` port; HAProxy discovers instances through Consul DNS on port 8600.
+
+> **Security:** Registrator mounts `/var/run/docker.sock` to watch container
+> events. A mounted Docker socket is host-root-equivalent — keep this to local
+> use only.
 
 ## Services
 
-- **HAProxy**: Load balancer with DNS-based service discovery from Consul
-- **Consul**: Service discovery and configuration management with DNS interface
-- **App**: Sample Bun.js application (3 replicas) running on port 3000
-- **Registrator**: Automatic service registration for Docker containers
-
-## Running
-
-Start all services:
-```bash
-docker compose up -d
-```
-
-- **Consul UI**: http://localhost:8500/ui — Services list shows `consul` (1 instance) plus `app` (3 instances registered by Registrator via the Docker socket).
-- **Application (via HAProxy)**: http://localhost:8080 — round-robins across the three app replicas.
-- **HAProxy stats**: http://localhost:8404/stats — note this is on port **8404**, not 8080.
-
-Bring the stack down with `docker compose down`.
-
-## Notes
-
-- Boots cleanly on OrbStack (macOS) with `docker compose up -d`; no changes needed to the tracked config. Consul UI is reachable within ~10s.
-- Registrator uses the `-internal` flag, so it registers each container's internal `:3000` port with Consul; HAProxy resolves the `_app._tcp.service.consul` SRV records through Consul's DNS (port 8600) and populates its `server-template` backend dynamically.
-- Consul runs in `-dev` mode — state is ephemeral and not persisted between runs.
-
-## Access Points
-
-- Application: http://localhost:8080
-- HAProxy Stats: http://localhost:8404/stats
-- Consul UI: http://localhost:8500
-
-## How It Works
-
-1. **Registrator** automatically detects app containers and registers them with Consul
-2. **Consul** provides DNS-based service discovery via SRV records
-3. **HAProxy** uses `server-template` with DNS resolution to discover app instances
-4. Services are registered as `_app._tcp.service.consul` SRV records
-5. HAProxy dynamically updates backend servers based on DNS queries to Consul
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **haproxy** | `8080` (→80), `8404` | Load balancer with DNS-based `server-template` backend + stats page |
+| **consul** | `8500`, `8600/udp` | Service discovery + DNS interface (dev mode, UI enabled) |
+| **app** | — | Bun.js sample server on internal `:3000`, scaled to 3 replicas |
+| **registrator** | — | Registers/deregisters app containers with Consul from Docker events |
 
 ## Configuration
 
-- HAProxy uses DNS resolution with `server-template` for dynamic service discovery
-- Consul runs in development mode with UI and DNS interface enabled on port 8600
-- App service runs 3 replicas on port 3000 with health checks
-- Registrator monitors Docker events for automatic service registration/deregistration
+Configuration lives in files, not env vars (sandbox-safe defaults):
 
-## Files
+| File / Setting | Default | Notes |
+|----------------|---------|-------|
+| `haproxy/haproxy.cfg` | — | HAProxy config; `server-template` + DNS resolvers pointed at Consul |
+| `app/server.js` | — | Bun.js sample application source |
+| `SERVICE_NAME` (app) | `app` | Service name Registrator publishes to Consul |
+| `SERVICE_3000_CHECK_HTTP` (app) | `/` | HTTP health-check path registered with Consul |
 
-- `docker-compose.yml`: Service definitions with Registrator integration
-- `haproxy/haproxy.cfg`: HAProxy configuration with DNS-based service discovery
-- `app/server.js`: Simple Bun.js server application
+## Volumes
+
+| Path | Contents |
+|------|----------|
+| `.docker/consul/data/` | Consul agent data (ephemeral — `-dev` mode does not persist state) |
+
+## Observability
+
+| Check | Endpoint / Command |
+|-------|--------------------|
+| HAProxy stats | `http://localhost:8404/stats` |
+| Consul UI | `http://localhost:8500/ui` |
+| Consul DNS | `dig @localhost -p 8600 app.service.consul SRV` |
+| Logs | `docker compose logs -f haproxy` |
+
+## Resources
+
+- HAProxy: https://github.com/haproxy/haproxy — https://www.haproxy.org/
+- Consul: https://github.com/hashicorp/consul — https://developer.hashicorp.com/consul
+- Registrator: https://github.com/gliderlabs/registrator
