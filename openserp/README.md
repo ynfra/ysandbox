@@ -1,16 +1,10 @@
 # OpenSERP
 
+Search engine results API. Fetches results from Google, Yandex, Baidu, Bing, and
+DuckDuckGo and returns them as JSON over a REST API, driving a headless Chromium
+per engine.
+
 ![openserp](docs/dashboard.png)
-
-Search engine results API. Fetches results from Google, Yandex, Baidu, Bing, and DuckDuckGo via a REST API.
-
-## Services
-
-- **openserp**: OpenSERP API server
-
-## Ports
-
-- `7000`: OpenSERP REST API
 
 ## Usage
 
@@ -18,63 +12,60 @@ Search engine results API. Fetches results from Google, Yandex, Baidu, Bing, and
 make docker-up
 ```
 
-## Examples
+- Interactive Swagger UI: `http://localhost:7000/docs` (the root path `/`
+  returns `404` — use `/docs`). The OpenAPI spec is at `/openapi.yaml`.
+- Health: `curl http://localhost:7000/health` → `200`.
 
-Google search:
+> **macOS host-port clash.** The macOS AirPlay Receiver binds host port `7000`
+> and answers with an `AirTunes` `403`. This stack ships a committed
+> `docker-compose.override.yml` remapping the host port to `7070`
+> (`ports: !override` → `"7070:7000"`), so on macOS reach it at
+> `http://localhost:7070` instead. Either disable AirPlay Receiver or keep the
+> override.
+
+> **Live search needs a working browser backend.** Engines drive a headless
+> Chromium; under `linux/amd64` emulation on Apple Silicon a search may return
+> `{"error":"engine_internal","code":502, ... browser connect failed}`. The
+> server itself still boots healthy and the Swagger UI renders.
+
+<details><summary>API examples</summary>
 
 ```bash
+# Google search
 curl "http://localhost:7000/google/search?text=hello+world&lang=en"
-```
 
-Multi-engine search:
-
-```bash
+# Multi-engine search
 curl "http://localhost:7000/mega/search?text=hello+world"
-```
 
-Image search:
-
-```bash
+# Image search
 curl "http://localhost:7000/google/image?text=cats"
 ```
 
-Health check:
+</details>
 
-```bash
-curl "http://localhost:7000/health"
-```
+## Services
 
-## Running
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **openserp** | `7000` (host `7070` via committed override) | OpenSERP REST API + Swagger UI, backed by headless Chromium |
 
-```bash
-docker compose up -d
-```
+## Configuration
 
-- **Swagger UI**: the interactive API docs render at `/docs` (not
-  `/swagger/index.html`) — e.g. `http://localhost:7000/docs`. The OpenAPI
-  spec is served at `/openapi.yaml`.
-- **Health**: `curl http://localhost:7000/health` → `200`.
-- Sample search request:
+No `.env` — the server is configured via the `command:` in `docker-compose.yml`
+(`serve -a 0.0.0.0 -p 7000`). No sandbox secrets.
 
-  ```bash
-  curl "http://localhost:7000/google/search?text=docker&lang=EN"
-  ```
+## Volumes
 
-## Notes
+None — stateless.
 
-- **AirPlay / port 7000 clash (macOS):** the macOS AirPlay Receiver
-  (Control Center) binds host port `7000` and answers with an
-  `AirTunes/...` `403`. When testing this stack locally a gitignored
-  `docker-compose.override.yml` was used to remap the host port to `7070`
-  (`ports: !override` → `"7070:7000"`); all URLs above then use `7070`.
-  The override is never committed. Either disable AirPlay Receiver or use
-  such an override.
-- **Swagger path:** the UI lives at `/docs`, and the root path `/`
-  returns `404` — use `/docs`.
-- **Live search needs a browser backend.** The engines drive a headless
-  Chromium (container ports `9222`/`9223`). Under `linux/amd64` emulation
-  on Apple Silicon, `/google/search` may return
-  `{"error":"engine_internal","code":502, ... browser connect failed}` if
-  the bundled browser can't be reached — this is a runtime/emulation
-  limitation, not a compose-config issue. The server itself boots healthy
-  and the Swagger UI (screenshot above) renders correctly.
+## Observability
+
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Health | `curl http://localhost:7000/health` |
+| API docs | `http://localhost:7000/docs` |
+| Logs | `docker compose logs -f openserp` |
+
+## Resources
+
+- GitHub: https://github.com/karust/openserp

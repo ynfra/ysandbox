@@ -1,24 +1,15 @@
 # Helicone
 
+Open-source LLM proxy + analytics platform. Route OpenAI and Anthropic calls
+through Helicone to get request logging, cost tracking, user analytics, rate
+limiting, and caching.
+
 ![helicone](docs/dashboard.png)
 
-Open-source LLM proxy + analytics platform. Route OpenAI and Anthropic calls through Helicone to get request logging, cost tracking, user analytics, rate limiting, and caching.
-
-> Uses the `helicone/helicone-all-in-one` image which bundles PostgreSQL, ClickHouse, MinIO, and Redis into a single container.
-
-## Services
-
-| Service | Description |
-|---------|-------------|
-| **helicone** | All-in-one: web UI + Jawn proxy + PostgreSQL + ClickHouse + MinIO + Redis |
-
-## Ports
-
-| Port | Service |
-|------|---------|
-| `3000` | Web dashboard |
-| `8585` | Jawn LLM proxy (use this as your OpenAI base URL) |
-| `9081` | MinIO S3 API |
+> Uses the `helicone/helicone-all-in-one` image, which bundles PostgreSQL,
+> ClickHouse, MinIO, and Redis into a **single** container. First boot is slow —
+> the healthcheck allows a 60s start period before the dashboard responds.
+> Self-hosted mode supports **OpenAI and Anthropic only**.
 
 ## Usage
 
@@ -26,38 +17,15 @@ Open-source LLM proxy + analytics platform. Route OpenAI and Anthropic calls thr
 make docker-up
 ```
 
-Open http://localhost:3000
+Open http://localhost:3000 and sign in with the seeded account
+**`test@helicone.ai` / `password`** (the all-in-one image skips email
+confirmation), or register a new account and run through the org/onboarding
+steps to reach the analytics dashboard.
 
-**Default login:** `test@helicone.ai` / `password`
+<details><summary>API examples</summary>
 
-> **Security:** Set a real `BETTER_AUTH_SECRET` in `.env` before exposing to the network:
-> ```bash
-> openssl rand -hex 32
-> ```
-
-## Running
-
-```bash
-docker compose up -d
-```
-
-- **Dashboard:** http://localhost:3000
-- **Jawn proxy:** http://localhost:8585 (use as your OpenAI / Anthropic base URL)
-
-Sign in with the seeded account **`test@helicone.ai` / `password`** (the
-all-in-one image skips email confirmation), or register a new account, then run
-through the org / onboarding steps to reach the analytics dashboard.
-
-## Notes
-
-- Large all-in-one image (Postgres + ClickHouse + MinIO + Redis in one
-  container) — **first boot is slow**; the healthcheck allows a 60s start period
-  before the dashboard responds.
-- All datastores persist under `.docker/` (`postgres/`, `clickhouse/`, `minio/`).
-
-## Using the Proxy
-
-Replace your OpenAI base URL with the Helicone proxy endpoint:
+Route calls through the Jawn proxy on port `8585` instead of the provider's
+base URL:
 
 **Python (OpenAI):**
 ```python
@@ -65,7 +33,7 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url="http://localhost:8585/v1/gateway/oai/v1",
-    api_key="your-openai-api-key"
+    api_key="your-openai-api-key",
 )
 ```
 
@@ -75,21 +43,48 @@ import anthropic
 
 client = anthropic.Anthropic(
     base_url="http://localhost:8585/v1/gateway/anthropic",
-    api_key="your-anthropic-api-key"
+    api_key="your-anthropic-api-key",
 )
 ```
 
-## Limitations (Self-Hosted)
+</details>
 
-- Supports **OpenAI and Anthropic only** (no other providers in self-hosted mode)
-- Advanced experiments and fine-tuning features require cloud version
+## Services
+
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **helicone** | `3000`, `8585`, `9081` | All-in-one: web UI (`3000`) + Jawn LLM proxy (`8585`) + MinIO S3 API (`9081`→9080) + bundled PostgreSQL / ClickHouse / Redis |
 
 ## Configuration
 
-Key environment variables in `.env`:
+Environment variables in `.env` (sandbox-safe defaults):
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `BETTER_AUTH_SECRET` | `changeme-...` | Session signing secret — **change in production** |
-| `SITE_URL` | `http://localhost:3000` | Public URL of your instance |
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `BETTER_AUTH_SECRET` | `changeme-...` | Session signing secret — **change** (`openssl rand -hex 32`) |
+| `SITE_URL` | `http://localhost:3000` | Public URL of the instance |
+| `NEXT_PUBLIC_HELICONE_JAWN_SERVICE` | `http://localhost:8585` | Jawn proxy URL |
+| `S3_ENDPOINT` | `http://localhost:9081` | MinIO S3 endpoint |
+| `S3_ACCESS_KEY` / `S3_SECRET_KEY` | `minioadmin` | MinIO credentials — **change** for real use |
 | `NEXT_PUBLIC_IS_ON_PREM` | `true` | Enables on-premise mode |
+
+## Volumes
+
+| Path | Contents |
+|------|----------|
+| `.docker/postgres/` | PostgreSQL data |
+| `.docker/clickhouse/` | ClickHouse analytics data |
+| `.docker/minio/` | MinIO object storage (request/response bodies) |
+
+## Observability
+
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Health | `curl -f http://localhost:3000` (compose healthcheck) |
+| Dashboard | `http://localhost:3000` |
+| Logs | `docker compose logs -f helicone` |
+
+## Resources
+
+- GitHub: https://github.com/Helicone/helicone
+- Docs: https://docs.helicone.ai/

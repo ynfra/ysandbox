@@ -1,29 +1,11 @@
 # Comet Opik
 
+Open-source LLM observability and evaluation platform — tracing, experiments,
+prompt versioning, LLM-as-judge evals, and CI/CD integration. Multi-service
+stack (Java backend, Python evaluator, MySQL, ClickHouse, ZooKeeper, Redis,
+MinIO) behind an Nginx frontend.
+
 ![opik](docs/dashboard.png)
-
-Open-source LLM observability and evaluation platform — tracing, experiments, prompt versioning, LLM-as-judge evals, and CI/CD integration. Apache-2.0 licensed.
-
-## Services
-
-| Service | Description |
-|---------|-------------|
-| **frontend** | Nginx web UI |
-| **backend** | Java API server (Spring Boot) with MySQL + ClickHouse migrations |
-| **python-backend** | Python evaluation service (runs user code in isolated containers) |
-| **mysql** | MySQL 8 for relational/metadata storage |
-| **clickhouse** | ClickHouse for trace/span analytics |
-| **zookeeper** | ZooKeeper for ClickHouse coordination |
-| **redis** | Redis cache and session store |
-| **minio** | MinIO S3-compatible object storage |
-| **mc** | One-time MinIO bucket initializer |
-
-## Ports
-
-| Port | Service |
-|------|---------|
-| `5173` | Web UI |
-| `9001` | MinIO Console (admin, localhost-only) |
 
 ## Usage
 
@@ -31,59 +13,26 @@ Open-source LLM observability and evaluation platform — tracing, experiments, 
 make docker-up      # or: docker compose up -d
 ```
 
-Open http://localhost:5173 — no login required by default.
+Open [`http://localhost:5173`](http://localhost:5173) — no login required by
+default. The frontend Nginx proxies `/api` to the backend.
 
-> **Note:** First startup takes 2–3 minutes. The Java backend runs database migrations (Liquibase for MySQL + ClickHouse) before becoming healthy.
+> **First boot takes 2–3 minutes.** The Java backend runs Liquibase (MySQL) +
+> ClickHouse migrations before it reports healthy, and every service is ordered
+> by healthchecks (`docker compose ps` should show all `healthy`). ClickHouse
+> mounts `clickhouse-macros.xml` to supply the `macros`/`zookeeper`/
+> `remote_servers` cluster definitions the migrations need for
+> `ReplicatedMergeTree` + `ON CLUSTER` DDL — without it the backend never
+> becomes healthy.
 
-## Running
+> **Security note.** `python-backend` mounts the host Docker socket
+> (`/var/run/docker.sock`) so it can spawn ephemeral executor containers for
+> user-supplied eval code. A Docker-socket mount is host-root-equivalent — only
+> run this on trusted local machines.
 
-One command brings the whole stack up out of the box — no override needed:
+<details><summary>API examples</summary>
 
-```bash
-docker compose up -d
-```
+Python SDK:
 
-- **Frontend / API:** http://localhost:5173 (the frontend nginx proxies `/api` to the backend).
-- **Multi-container stack:** `mysql`, `clickhouse`, `redis`, `zookeeper`, `minio`,
-  `backend`, `python-backend`, and `frontend` all boot together, ordered by
-  healthchecks (`docker compose ps` should show every service `healthy`).
-- **ClickHouse cluster / macros:** ClickHouse mounts `clickhouse-macros.xml` into
-  `/etc/clickhouse-server/config.d/`. This supplies the `macros`, `zookeeper`, and
-  `remote_servers` cluster definition that the backend's ClickHouse migrations
-  require for `ReplicatedMergeTree` tables and `ON CLUSTER` DDL. Without it the
-  migrations fail and the backend never becomes healthy.
-- **Frontend nginx:** `nginx_default.conf.template` is mounted into
-  `/etc/nginx/templates/` and rendered with `NGINX_PORT=5173`, exposing the `/api`
-  reverse proxy and the `/health` endpoint used by the healthcheck.
-- **DB migrations:** the backend runs `run_db_migrations.sh` (MySQL + ClickHouse)
-  before starting the app; expect ~1–2 min before it reports healthy on first boot.
-
-> **Security note:** `python-backend` mounts the host Docker socket
-> (`/var/run/docker.sock`) so it can spawn ephemeral `sandbox-executor`
-> containers to run user-supplied evaluation code. A Docker-socket mount is
-> host-root-equivalent — only run this stack on trusted local machines.
-
-To stop:
-
-```bash
-docker compose down       # add -v to also drop the .docker/ volumes
-```
-
-## Configuration
-
-Key environment variables in `.env`:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `MYSQL_PASSWORD` | `opik` | MySQL user password |
-| `CLICKHOUSE_PASSWORD` | `opik` | ClickHouse password |
-| `REDIS_PASSWORD` | `opik` | Redis password |
-| `MINIO_ROOT_USER` | `opik-access-key` | MinIO access key |
-| `MINIO_ROOT_PASSWORD` | `opik-secret-key` | MinIO secret key |
-
-## SDK Integration
-
-**Python:**
 ```python
 pip install opik
 import opik
@@ -93,16 +42,65 @@ from opik.integrations.openai import track_openai
 from openai import OpenAI
 
 client = track_openai(OpenAI())
-response = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[{"role": "user", "content": "Hello"}]
-)
+client.chat.completions.create(model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello"}])
 ```
 
-**LangChain:**
+LangChain:
+
 ```python
 from opik.integrations.langchain import OpikTracer
-
 tracer = OpikTracer()
 chain.invoke({"input": "..."}, config={"callbacks": [tracer]})
 ```
+
+</details>
+
+## Services
+
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **frontend** | `5173` | Nginx web UI, proxies `/api` to the backend |
+| **backend** | — | Java (Spring Boot) API server; runs MySQL + ClickHouse migrations |
+| **python-backend** | — | Python evaluation service (mounts Docker socket to run eval code) |
+| **mysql** | — | MySQL 8 relational/metadata store |
+| **clickhouse** | — | ClickHouse trace/span analytics |
+| **zookeeper** | — | ClickHouse coordination |
+| **redis** | — | Cache / session store |
+| **minio** | `127.0.0.1:9001` (console) | S3-compatible object storage |
+| **mc** | — | One-time MinIO bucket initializer |
+
+## Configuration
+
+Environment variables (compose defaults, overridable via `.env`):
+
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `MYSQL_PASSWORD` | `opik` | MySQL user password; **change** for real use |
+| `CLICKHOUSE_PASSWORD` | `opik` | ClickHouse password; **change** for real use |
+| `REDIS_PASSWORD` | `opik` | Redis password; **change** for real use |
+| `MINIO_ROOT_USER` | `opik-access-key` | MinIO access key; **change** for real use |
+| `MINIO_ROOT_PASSWORD` | `opik-secret-key` | MinIO secret key; **change** for real use |
+
+## Volumes
+
+| Path | Contents |
+|------|----------|
+| `.docker/mysql/` | MySQL data |
+| `.docker/clickhouse/` | ClickHouse data |
+| `.docker/zookeeper/` | ZooKeeper data |
+| `.docker/redis/` | Redis persistence |
+| `.docker/minio/` | MinIO object storage |
+
+## Observability
+
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Frontend health | `curl http://localhost:5173/health` |
+| Service status | `docker compose ps` (expect all `healthy`) |
+| Logs | `docker compose logs -f frontend` |
+
+## Resources
+
+- GitHub: https://github.com/comet-ml/opik
+- Docs: https://www.comet.com/docs/opik/

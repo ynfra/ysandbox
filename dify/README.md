@@ -1,33 +1,12 @@
 # Dify
 
+Open-source LLM app development platform — a visual workflow/agent builder with
+RAG pipelines, prompt orchestration, and a model-agnostic backend. Build
+assistants, agents, and chat apps on a drag-and-drop canvas, then expose them as
+REST APIs or **MCP servers**. This compose is a sandbox-trimmed but bootable
+subset of the official `docker/` deployment (Dify `1.15.0`).
+
 ![dify](docs/dashboard.png)
-
-Open-source LLM app development platform — visual workflow/agent builder, RAG pipelines, prompt orchestration, and a model-agnostic backend (100k+ ⭐). Build assistants, agents and chat apps in a drag-and-drop canvas, then expose them as APIs or **MCP servers**. This is a large, multi-container stack; the compose here is a sandbox-trimmed but bootable subset of the official `docker/` deployment (Dify `1.15.0`).
-
-## Services
-
-| Service | Image | Description |
-|---------|-------|-------------|
-| **nginx** | `nginx:latest` | Entry reverse proxy — single door to web + api |
-| **web** | `langgenius/dify-web:1.15.0` | Next.js console / app UI |
-| **api** | `langgenius/dify-api:1.15.0` | Console + service REST API (Flask/Gunicorn) |
-| **worker** | `langgenius/dify-api:1.15.0` | Celery worker (datasets, workflows, mail) |
-| **db** | `postgres:15-alpine` | PostgreSQL — app metadata and config |
-| **redis** | `redis:6-alpine` | Cache + Celery broker |
-| **weaviate** | `semitechnologies/weaviate:1.27.0` | Vector store for RAG embeddings |
-| **sandbox** | `langgenius/dify-sandbox:0.2.15` | Secure code-execution runtime |
-| **ssrf_proxy** | `ubuntu/squid:latest` | Squid forward proxy guarding sandbox egress |
-| **init_permissions** | `busybox:latest` | One-shot init that fixes storage ownership |
-
-Optional upstream services (`plugin_daemon`, `api_websocket`, `certbot`, MySQL, and the alternative vector stores such as Qdrant / pgvector / Milvus / OpenSearch) are intentionally omitted for a lean local sandbox.
-
-## Ports
-
-| Port | Service |
-|------|---------|
-| `8080` | nginx entry proxy (host `8080` → container `80`) |
-
-All other services are reachable only on the internal Compose networks.
 
 ## Usage
 
@@ -35,71 +14,85 @@ All other services are reachable only on the internal Compose networks.
 make docker-up
 ```
 
-Then open http://localhost:8080 — on first launch you are redirected to
-http://localhost:8080/install to create the initial admin account.
+Open http://localhost:8080 — on first launch you are redirected to
+http://localhost:8080/install to create the initial admin (owner) account
+(email, username, 8+ char password). After signing in you land on the **Studio**
+apps dashboard; add a model provider under **Settings → Model Provider**, then
+build an app from a template or a blank canvas.
 
-> **Note:** The API runs database migrations on first boot, so the console may
-> take a minute or two to become reachable while `api`/`worker` initialize.
+> **First boot is slow.** This is a large multi-image stack and `api` runs DB
+> migrations before the console answers. Poll
+> `curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/install` until it
+> returns `200` (allow a few minutes on a cold pull).
 
-## Running
+> **"Failed to request plugin daemon" toasts are expected.** The optional
+> `plugin_daemon` service is intentionally omitted from this lean sandbox, so the
+> console shows a transient plugin-daemon warning on first load. Core
+> app/workflow/RAG features work without it; only the in-app plugin marketplace
+> is unavailable.
 
-```bash
-docker compose up -d      # or: make docker-up
-```
+<details><summary>MCP servers</summary>
 
-Then open **http://localhost:8080**. On first launch you are redirected to
-**http://localhost:8080/install** to create the initial admin (owner) account —
-supply an email, username, and an 8+ char password (letters + numbers). Dify
-signs you straight in and drops you on the **Studio** apps dashboard
-(`/apps`, "Build your first App"). From there add a model provider under
-**Settings → Model Provider**, then create an app from a template or blank
-canvas.
+Dify apps and workflows can be **published as MCP (Model Context Protocol)
+servers**, letting external MCP clients (IDEs, agents, other LLM tools) call your
+Dify apps as tools. Publish an app, then expose it via its MCP endpoint under the
+app's API/access settings.
 
-Ten containers boot together: `nginx` (entry proxy) → `web` + `api` + `worker`,
-backed by `db` (PostgreSQL), `redis`, `weaviate` (vectors), `sandbox` (code
-execution) fronted by `ssrf_proxy` (Squid), plus a one-shot `init_permissions`
-that fixes storage ownership. Bring it down with `docker compose down` (state
-persists under `.docker/`).
+</details>
 
-### Notes / gotchas
+## Services
 
-- **First boot is slow.** This is a large stack with big image pulls; `api`
-  runs DB migrations before the console answers. Poll
-  `curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/install`
-  until it returns `200` (allow a few minutes on a cold pull).
-- **"Failed to request plugin daemon" toasts are expected.** The optional
-  `plugin_daemon` service is intentionally omitted from this lean sandbox, so
-  the console shows a transient plugin-daemon warning on first load. It is
-  harmless — the core app/workflow/RAG features work without it; only the
-  in-app plugin marketplace is unavailable.
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **nginx** | `8080` → `80` | Entry reverse proxy — single door to web + api |
+| **web** | — | Next.js console / app UI (`dify-web:1.15.0`) |
+| **api** | — | Console + service REST API (Flask/Gunicorn, `dify-api:1.15.0`) |
+| **worker** | — | Celery worker — datasets, workflows, mail (`dify-api:1.15.0`) |
+| **db** | — | PostgreSQL 15 — app metadata and config |
+| **redis** | — | Redis 6 — cache + Celery broker |
+| **weaviate** | — | Vector store for RAG embeddings (`weaviate:1.27.0`) |
+| **sandbox** | — | Secure code-execution runtime (`dify-sandbox:0.2.15`) |
+| **ssrf_proxy** | — | Squid forward proxy guarding sandbox egress |
+| **init_permissions** | — | One-shot init that fixes storage ownership (busybox) |
+
+Optional upstream services (`plugin_daemon`, `api_websocket`, `certbot`, MySQL,
+and alternative vector stores such as Qdrant / pgvector / Milvus / OpenSearch)
+are intentionally omitted for a lean local sandbox.
 
 ## Configuration
 
-Key environment variables live in `.env` (loaded via `env_file:`). All defaults
-are **sandbox-safe only — change them before any real use.**
+Environment variables in `.env` (loaded via `env_file:`). All defaults are
+**sandbox-safe only — change them before any real use.**
 
 | Variable | Default | Notes |
 |----------|---------|-------|
-| `SECRET_KEY` | `sk-dify-sandbox-CHANGE-ME…` | Session/data signing key — generate with `openssl rand -base64 42` |
-| `DB_PASSWORD` | `difyai123456` | PostgreSQL password |
-| `REDIS_PASSWORD` | `difyai123456` | Redis password (also in `CELERY_BROKER_URL`) |
+| `SECRET_KEY` | `sk-dify-sandbox-CHANGE-ME…` | Session/data signing key — **change**; generate with `openssl rand -base64 42` |
+| `DB_PASSWORD` | `difyai123456` | PostgreSQL password — **change** |
+| `REDIS_PASSWORD` | `difyai123456` | Redis password (also in `CELERY_BROKER_URL`) — **change** |
 | `VECTOR_STORE` | `weaviate` | Vector backend |
-| `WEAVIATE_API_KEY` | `WVF5…pkih` | Weaviate API key |
-| `SANDBOX_API_KEY` | `dify-sandbox` | Code-execution sandbox key |
+| `WEAVIATE_API_KEY` | `WVF5…pkih` | Weaviate API key — **change** |
+| `SANDBOX_API_KEY` | `dify-sandbox` | Code-execution sandbox key — **change** |
 | `EXPOSE_NGINX_PORT` | `8080` | Host port for the entry proxy |
 
-Admin setup: visit http://localhost:8080/install on first run to create the
-owner account, then sign in and configure a model provider (OpenAI, Anthropic,
-Ollama, etc.) under **Settings → Model Provider** before building apps.
+## Volumes
 
-### MCP servers
+| Path | Contents |
+|------|----------|
+| `.docker/app/storage/` | API/worker uploaded files and app storage |
+| `.docker/db/data/` | PostgreSQL data |
+| `.docker/redis/data/` | Redis persistence |
+| `.docker/weaviate/` | Weaviate vector store |
+| `.docker/sandbox/dependencies/` | Sandbox runtime dependencies |
 
-Dify apps and workflows can be **published as MCP (Model Context Protocol)
-servers**, letting external MCP clients (IDEs, agents, other LLM tools) call
-your Dify apps as tools. Publish an app, then expose it via its MCP endpoint
-under the app's API/access settings.
+## Observability
 
-## Links
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Readiness | `curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/install` |
+| API health (in-container) | `curl -f http://localhost:5001/health` |
+| Logs | `docker compose logs -f api worker nginx` |
+
+## Resources
 
 - GitHub: https://github.com/langgenius/dify
 - Docs: https://docs.dify.ai

@@ -1,49 +1,25 @@
 # Browserless
 
-![browserless](docs/dashboard.png)
+Headless Chromium API for browser automation, screenshots, PDF generation, and scraping. Exposes an HTTP API plus an interactive docs UI and live session debugger.
 
-Headless Chromium API for browser automation, screenshots, PDF generation, and scraping.
+![Browserless dashboard](docs/dashboard.png)
 
-## Services
-
-- **browserless**: Browserless Chromium server
-
-## Ports
-
-- `3000`: Browserless API endpoint
-
-## Running
+## Usage
 
 ```bash
-docker compose up -d
+make docker-up
 ```
 
-- **API / docs UI**: <http://localhost:3000/docs> — interactive docs + OpenAPI reference.
-- **Live debugger**: <http://localhost:3000/debugger/> — interactive session debugger.
-- **Version probe**: <http://localhost:3000/json/version>
+Reach it at:
 
-No token is configured in `docker-compose.yml` (`BROWSERLESS_TOKEN` is left
-commented out), so the server runs open — `GET /config` reports `"token": null`
-and no `?token=` query param is required for any endpoint. Set
-`BROWSERLESS_TOKEN` in the compose to lock it down.
+- **API / docs UI**: http://localhost:3000/docs — interactive docs + OpenAPI reference
+- **Live debugger**: http://localhost:3000/debugger/ — interactive session debugger
+- **Version probe**: http://localhost:3000/json/version
 
-Sample request (capture a screenshot of a page):
+> No token is configured (`BROWSERLESS_TOKEN` is commented out), so the server runs open — `GET /config` reports `"token": null` and no `?token=` param is required. Set `BROWSERLESS_TOKEN` to lock it down. The root path `/` returns 404; the UI lives at `/docs` and `/debugger/`. Host port `3000` is shared with several other ysandbox stacks — run only one at a time, or remap it via a gitignored `docker-compose.override.yml`.
 
-```bash
-curl -X POST http://localhost:3000/screenshot \
-    -H "Content-Type: application/json" \
-    -d '{"url": "https://example.com"}' -o screenshot.png
-```
-
-### Notes
-
-- Boots clean with plain `docker compose up -d`; the server logs
-  `HTTP Server is listening on http://0.0.0.0:3000` once ready (a few seconds).
-- The root path `/` returns 404 — the UI lives at `/docs` and `/debugger/`, not `/`.
-- Host port `3000` is shared with several other ysandbox stacks; run only one at
-  a time, or add a gitignored `docker-compose.override.yml` to remap it.
-
-## Examples
+<details>
+<summary>API examples</summary>
 
 Take a screenshot:
 
@@ -60,9 +36,37 @@ curl -X POST http://localhost:3000/pdf \
     -H "Content-Type: application/json" \
     -d '{"url": "https://example.com"}' -o page.pdf
 ```
+</details>
+
+## Services
+
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **browserless** | `3000` | Browserless Chromium server (API, docs UI, debugger) |
 
 ## Configuration
 
-- `CONCURRENT`: Max concurrent browser sessions (default: 3)
-- `TIMEOUT`: Session timeout in ms (default: 30000)
-- `BROWSERLESS_TOKEN`: Optional API token for authentication
+Environment variables in `docker-compose.yml`:
+
+| Variable | Default | Notes |
+|----------|---------|-------|
+| `CONCURRENT` | `3` | Max concurrent browser sessions |
+| `TIMEOUT` | `30000` | Session timeout (ms) |
+| `BROWSERLESS_TOKEN` | *(unset)* | Optional API token — set to require auth |
+
+## Volumes
+
+None — stateless.
+
+## Observability
+
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Version | `curl http://localhost:3000/json/version` |
+| Config | `curl http://localhost:3000/config` |
+| Logs | `docker compose logs -f browserless` |
+
+## Resources
+
+- GitHub: https://github.com/browserless/browserless
+- Docs: https://docs.browserless.io

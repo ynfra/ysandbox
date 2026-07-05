@@ -1,208 +1,87 @@
 # Nginx + SWR
 
+Nginx reverse-proxy cache demo with stale-while-revalidate in front of a small
+Bun origin. Nginx caches the upstream response and serves stale content while it
+refreshes in the background, so repeated requests show `MISS` / `HIT` / `STALE` /
+`UPDATING` cache states. No authentication — this is a caching reference only.
+
 ![nginx-swr](docs/dashboard.png)
-
-- Nginx on [`http://localhost:8080`](http://localhost:8080)
-- App on [`http://localhost:3000`](http://localhost:3000)
-
-## Running
-
-```bash
-docker compose up -d
-```
-
-- Open [`http://localhost:8080`](http://localhost:8080) — Nginx serves the Bun
-  app (`app:3000`) through its proxy cache with stale-while-revalidate. The
-  response body is a timestamp (`Now: <date>`) so repeated requests show the
-  caching behaviour.
-- The `X-Cache-Status` response header reports `MISS` / `HIT` / `STALE` /
-  `UPDATING` — see the `curl` examples below.
-- [`http://localhost:3000`](http://localhost:3000) hits the Bun origin
-  directly (uncached), for comparison.
-
-No authentication — this is a static caching demo.
 
 ## Usage
 
+```bash
+make docker-up
 ```
-docker compose up
+
+- Open [`http://localhost:8080`](http://localhost:8080) — Nginx serves the Bun
+  app (`app:3000`) through its proxy cache. The body is a timestamp
+  (`Now: <date>`) so repeated requests reveal the caching behaviour.
+- [`http://localhost:3000`](http://localhost:3000) hits the Bun origin directly
+  (uncached) for comparison.
+- The `X-Cache-Status` response header reports `MISS` / `HIT` / `STALE` /
+  `UPDATING`.
+
+Load-test the cache with the bundled script:
+
+```bash
+./tester.sh        # ./tester.sh 10s | 60s
 ```
+
+<details><summary>API examples</summary>
+
+```sh
+# Request 1 — cache miss
+❯ curl -i http://localhost:8080/
+X-Cache-Status: MISS
+Now: Sun, 23 Feb 2025 21:38:37 GMT
+
+# Request 2 — cache hit
+❯ curl -i http://localhost:8080/
+X-Cache-Status: HIT
+Now: Sun, 23 Feb 2025 21:38:37 GMT
+
+# After proxy_cache_valid expires — served stale, refreshed in background
+❯ curl -i http://localhost:8080/
+X-Cache-Status: STALE
+Now: Sun, 23 Feb 2025 21:38:37 GMT
+```
+
+</details>
+
+## Services
+
+| Container | Port(s) | Description |
+|-----------|---------|-------------|
+| **nginx** | `8080` | Nginx 1.27 proxy cache with stale-while-revalidate in front of `app` |
+| **app** | `3000` | Bun origin returning a `Now: <timestamp>` body (also reachable directly) |
 
 ## Configuration
 
-**Cache zone**
+No `.env` — behaviour is defined entirely in `nginx/nginx.conf`:
 
-```
-# nginx.conf
-proxy_cache_path /srv/cache levels=1:2 keys_zone=cache:10m max_size=10g inactive=5m use_temp_path=off;
-```
+| Directive | Value | Notes |
+|-----------|-------|-------|
+| `proxy_cache_path` | `/srv/cache levels=1:2 keys_zone=cache:10m max_size=10g inactive=5m` | In-container cache zone (not persisted) |
+| `proxy_cache_valid` | `1m` | Fresh window before a cached entry goes stale |
+| `proxy_cache_use_stale` | `error timeout updating http_500..504` | When stale content may still be served |
+| `proxy_cache_background_update` | `on` | Refresh stale entries in the background |
+| `proxy_cache_lock` | `on` | Only one request populates a given key at a time |
 
-- [`proxy_cache_path`](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_path) - cache zone
-  - `/srv/cache` - cache directory
-  - `levels=1:2` - cache directory levels
-  - `keys_zone=cache:10m` - cache name and cache size
-  - `max_size=10g` - cache max size
-  - `inactive=5m` - cache inactive time
-  - `use_temp_path=off` - use cache directory
+## Volumes
 
-**Proxy**
+None — stateless. The cache lives in `/srv/cache` inside the Nginx container and
+is discarded on `docker compose down`. `nginx/nginx.conf` and `app/server.js` are
+read-only config bind mounts, not persisted state.
 
-```
-# nginx.conf
-location / {
-    proxy_pass http://app:3000;
+## Observability
 
-    proxy_cache cache;
-    proxy_cache_revalidate on;
-    proxy_cache_min_uses 1;
-    proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
-    proxy_cache_background_update on;
-    proxy_cache_lock on;
-    proxy_cache_valid 1m;
+| Check | Endpoint / Command |
+|-------|--------------------|
+| Cache status | `curl -i http://localhost:8080/` (read `X-Cache-Status`) |
+| Origin (uncached) | `curl -i http://localhost:3000/` |
+| Logs | `docker compose logs -f nginx` |
 
-    add_header X-Cache-Status $upstream_cache_status;
-}
-```
+## Resources
 
-- [`proxy_cache`](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache) - use defined cache zone by name
-- [`proxy_cache_revalidate`](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_revalidate) - enable cache revalidation
-- [`proxy_cache_min_uses`](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_min_uses) - minimum number of requests to cache
-- [`proxy_cache_use_stale`](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_use_stale) - cases when stale cache can be used
-- [`proxy_cache_background_update`](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_background_update) - update background cache invalidation
-- [`proxy_cache_lock`](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_lock) - only one request can update cache at a time
-- [`proxy_cache_valid`](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_cache_valid) - cache valid for a time
-
-## Architecture
-
-![](.docs/arch.png)
-
-## Examples
-
-1. Request 1 - cache miss
-
-```sh
-❯ curl -i http://localhost:8080/
-HTTP/1.1 200 OK
-Server: nginx
-Date: Sun, 23 Feb 2025 21:38:37 GMT
-Content-Type: text/plain;charset=utf-8
-Content-Length: 34
-Connection: keep-alive
-X-Cache-Status: MISS
-
-Now: Sun, 23 Feb 2025 21:38:37 GMT
-```
-
-2. Request 2 - cache hit
-
-```sh
-➜ curl -i http://localhost:8080/
-HTTP/1.1 200 OK
-Server: nginx
-Date: Sun, 23 Feb 2025 21:39:10 GMT
-Content-Type: text/plain;charset=utf-8
-Content-Length: 34
-Connection: keep-alive
-X-Cache-Status: HIT
-
-Now: Sun, 23 Feb 2025 21:38:37 GMT
-```
-
-3. Request 3 - cache stale (update in background)
-
-```sh
-➜ curl -i http://localhost:8080/
-HTTP/1.1 200 OK
-Server: nginx
-Date: Sun, 23 Feb 2025 21:41:30 GMT
-Content-Type: text/plain;charset=utf-8
-Content-Length: 34
-Connection: keep-alive
-X-Cache-Status: STALE
-
-Now: Sun, 23 Feb 2025 21:38:37 GMT
-```
-
-4. Request 4 - cache hit
-
-```sh
-➜ curl -i http://localhost:8080/
-HTTP/1.1 200 OK
-Server: nginx
-Date: Sun, 23 Feb 2025 21:41:35 GMT
-Content-Type: text/plain;charset=utf-8
-Content-Length: 34
-Connection: keep-alive
-X-Cache-Status: HIT
-
-Now: Sun, 23 Feb 2025 21:41:30 GMT
-```
-
-## Testing
-
-1. Run docker stack via `make docker-up`.
-
-2. Run HTTP tester.
-
-```sh
-./tester.sh
-# ./tester.sh 10s
-# ./tester.sh 60s
-```
-
-3. Open more terminals and run same commands.
-
-3. See logs in terminals.
-
-```
-# Terminal 1
-[2025-09-15 14:36:35] Cache: HIT | Body: Now: 2025-09-15-12:36:27
-[2025-09-15 14:36:36] Cache: HIT | Body: Now: 2025-09-15-12:36:27
-[2025-09-15 14:36:36] Cache: HIT | Body: Now: 2025-09-15-12:36:27
-[2025-09-15 14:36:37] Cache: HIT | Body: Now: 2025-09-15-12:36:27
-[2025-09-15 14:36:37] Cache: HIT | Body: Now: 2025-09-15-12:36:27
-[2025-09-15 14:36:38] Cache: UPDATING | Body: Now: 2025-09-15-12:36:27
-[2025-09-15 14:36:39] Cache: HIT | Body: Now: 2025-09-15-12:36:38
-[2025-09-15 14:36:39] Cache: HIT | Body: Now: 2025-09-15-12:36:38
-[2025-09-15 14:36:40] Cache: HIT | Body: Now: 2025-09-15-12:36:38
-[2025-09-15 14:36:40] Cache: HIT | Body: Now: 2025-09-15-12:36:38
-[2025-09-15 14:36:41] Cache: HIT | Body: Now: 2025-09-15-12:36:38
-
-# Terminal 2
-[2025-09-15 14:35:52] Cache: HIT | Body: Now: 2025-09-15-12:35:43
-[2025-09-15 14:35:52] Cache: HIT | Body: Now: 2025-09-15-12:35:43
-[2025-09-15 14:35:53] Cache: HIT | Body: Now: 2025-09-15-12:35:43
-[2025-09-15 14:35:53] Cache: HIT | Body: Now: 2025-09-15-12:35:43
-[2025-09-15 14:35:54] Cache: STALE | Body: Now: 2025-09-15-12:35:43
-[2025-09-15 14:35:54] Cache: HIT | Body: Now: 2025-09-15-12:35:54
-[2025-09-15 14:35:55] Cache: HIT | Body: Now: 2025-09-15-12:35:54
-[2025-09-15 14:35:55] Cache: HIT | Body: Now: 2025-09-15-12:35:54
-[2025-09-15 14:35:56] Cache: HIT | Body: Now: 2025-09-15-12:35:54
-
-# Docker
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:46 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:46 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:47 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:47 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:47 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:47 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:48 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:48 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:49 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-app-1    | [2025-09-15-12:36:49] GET http://app:3000/10s - 200 - IP: unknown - UA: curl/8.7.1
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:49 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:49 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:49 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:50 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:50 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:50 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:50 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:51 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:51 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:51 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:51 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:52 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:52 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:52 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-nginx-1  | 192.168.148.1 - - [15/Sep/2025:12:36:52 +0000] "GET /10s HTTP/1.1" 200 24 "-" "curl/8.7.1"
-```
+- Nginx `ngx_http_proxy_module`: https://nginx.org/en/docs/http/ngx_http_proxy_module.html
+- Bun: https://github.com/oven-sh/bun
