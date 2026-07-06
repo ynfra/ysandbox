@@ -135,6 +135,7 @@ Named Docker volumes (e.g. `db-config`, `deno-cache` in `supabase`) are managed 
 | `searxng` | `searxng/searxng:latest` + Valkey | 8080 | Self-hosted meta-search engine with JSON API |
 | `seonaut` | `ghcr.io/stjudewashere/seonaut:latest` + MySQL | 9000 | SEO auditing tool — crawls sites for ranking issues |
 | `serpbear` | `towfiqi/serpbear:latest` | 3000 | Search engine keyword position tracking |
+| `skillnote` | `ghcr.io/luna-prompts/skillnote-{api,web}:0.5.4` + PostgreSQL | 3000 (web), 8082 (API) | Open-source skill registry for AI coding agents (SKILL.md create/version/distribute) |
 | `skyvern` | `public.ecr.aws/skyvern/skyvern:latest` + PostgreSQL | 8000 (API), 8080 (UI), 9222 (CDP) | AI-powered browser automation with PostgreSQL |
 | `squid` | local build | 3128 | Squid forward proxy server |
 | `stirling-pdf` | `frooodle/s-pdf:latest` | 8080 | PDF toolkit (merge, split, OCR, convert) |

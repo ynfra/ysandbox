@@ -1,0 +1,67 @@
+# SkillNote — open-source skill registry for AI coding agents.
+# Adapted from the upstream canonical deploy compose (pinned GHCR images):
+#   https://github.com/luna-prompts/skillnote/blob/master/deploy/docker-compose.yml
+#
+# NOTE: there is no auth layer on the API/UI — fine for localhost, but never
+# expose ports 3000/8082 to the public internet without a proxy + auth.
+
+name: skillnote
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: skillnote
+      POSTGRES_USER: skillnote
+      POSTGRES_PASSWORD: ${SKILLNOTE_DB_PASSWORD:-skillnote}
+    volumes:
+      - ./.docker/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skillnote"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    image: ghcr.io/luna-prompts/skillnote-api:0.5.4
+    restart: unless-stopped
+    # The bundle store mounts at /app/data/bundles owned by root, but the image
+    # runs as the non-root "app" user, so the seed step can't create bundle
+    # subdirs (PermissionError). Running the API as root sidesteps it for the
+    # sandbox; drop this and pre-chown the mount for a hardened deployment.
+    user: "0:0"
+    environment:
+      SKILLNOTE_DATABASE_URL: postgresql+psycopg://skillnote:${SKILLNOTE_DB_PASSWORD:-skillnote}@postgres:5432/skillnote
+      SKILLNOTE_BUNDLE_STORAGE_DIR: /app/data/bundles
+      SKILLNOTE_CORS_ORIGINS: "http://${SKILLNOTE_HOST:-localhost}:${SKILLNOTE_WEB_PORT:-3000},http://localhost:${SKILLNOTE_WEB_PORT:-3000},http://127.0.0.1:${SKILLNOTE_WEB_PORT:-3000}"
+    ports:
+      - "${SKILLNOTE_API_PORT:-8082}:8080"
+    volumes:
+      - ./.docker/bundles:/app/data/bundles
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8080/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    command: >
+      sh -c "python scripts/wait_for_db.py &&
+             alembic upgrade head &&
+             python scripts/seed_data.py &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8080"
+
+  web:
+    image: ghcr.io/luna-prompts/skillnote-web:0.5.4
+    restart: unless-stopped
+    ports:
+      - "${SKILLNOTE_WEB_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_BASE_URL: "http://${SKILLNOTE_HOST:-localhost}:${SKILLNOTE_API_PORT:-8082}"
+    depends_on:
+      api:
+        condition: service_healthy

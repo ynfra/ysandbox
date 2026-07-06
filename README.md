@@ -23,6 +23,7 @@ Examples of ynfrastructure.
 
 - [ysandbox/prompthub](./prompthub) - PromptHub self-hosted web edition — prompt/skill/agent management with local login (SQLite).
 - [ysandbox/promptschat](./promptschat) - Self-hosted prompts.chat prompt library (Next.js + PostgreSQL) with local credential login.
+- [ysandbox/skillnote](./skillnote) - SkillNote open-source skill registry for AI coding agents — create/version/distribute SKILL.md files (Next.js + FastAPI + PostgreSQL).
 
 ## LLM engineering & observability
 
