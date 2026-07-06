@@ -19,6 +19,11 @@ Examples of ynfrastructure.
 - [ysandbox/n8n](./n8n) - n8n workflow automation with PostgreSQL, Redis, and Qdrant.
 - [ysandbox/windmill](./windmill) - Windmill workflow engine with Caddy.
 
+## Prompt management
+
+- [ysandbox/prompthub](./prompthub) - PromptHub self-hosted web edition — prompt/skill/agent management with local login (SQLite).
+- [ysandbox/promptschat](./promptschat) - Self-hosted prompts.chat prompt library (Next.js + PostgreSQL) with local credential login.
+
 ## LLM engineering & observability
 
 - [ysandbox/agenta](./agenta) - Agenta LLM engineering platform — prompt playground, evaluations, and tracing.
