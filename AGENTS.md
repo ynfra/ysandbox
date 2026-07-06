@@ -128,7 +128,9 @@ Named Docker volumes (e.g. `db-config`, `deno-cache` in `supabase`) are managed 
 | `pandoc` | `pandoc/extra:latest` | 3030 | Universal document format converter (Markdown, DOCX, EPUB, HTML, LaTeX) |
 | `paperless` | `ghcr.io/paperless-ngx/paperless-ngx:latest` + Tika + Gotenberg | 8000 | Document management with OCR |
 | `phoenix` | `arizephoenix/phoenix:latest` + PostgreSQL | 6006 | LLM observability by Arize (tracing, evals, OpenTelemetry) |
+| `prompthub` | `ghcr.io/legeling/prompthub-web:latest` | 3871 | PromptHub self-hosted web — prompt/skill/agent management (SQLite, local login) |
 | `promptregistry-mcp` | `supercorp/supergateway` (wraps `mcp-promptregistry`) | 8000 | Simple MCP prompt registry (stdio→SSE) |
+| `promptschat` | `ghcr.io/f/prompts.chat:latest` + PostgreSQL | 4444 | Self-hosted prompts.chat prompt library (Next.js) with local credential login |
 | `qdrant` | `qdrant/qdrant:latest` | 6333 (HTTP), 6334 (gRPC) | High-performance vector database |
 | `searxng` | `searxng/searxng:latest` + Valkey | 8080 | Self-hosted meta-search engine with JSON API |
 | `seonaut` | `ghcr.io/stjudewashere/seonaut:latest` + MySQL | 9000 | SEO auditing tool — crawls sites for ranking issues |

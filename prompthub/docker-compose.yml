@@ -1,0 +1,37 @@
+services:
+  prompthub-web:
+    image: ghcr.io/legeling/prompthub-web:latest
+    # Upstream only publishes a linux/amd64 image; pin it so arm64 hosts run it
+    # under emulation instead of failing with "no matching manifest".
+    platform: linux/amd64
+    container_name: prompthub-web
+    restart: unless-stopped
+    ports:
+      - "${PROMPTHUB_WEB_PORT:-3871}:3000"
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3000"
+      # DATA_ROOT is the parent of data/ config/ logs/ backups/ (all mounted below).
+      DATA_ROOT: /app
+      # Must be >= 32 chars. Override for anything non-local.
+      JWT_SECRET: "${JWT_SECRET:-prompthub-sandbox-jwt-secret-change-me-please-32}"
+      # Single-owner workspace: public registration stays off; the first admin
+      # account is created on first visit via /setup.
+      ALLOW_REGISTRATION: "${ALLOW_REGISTRATION:-false}"
+      # Trusted local sandbox — captcha disabled for easy setup/login. Upstream
+      # default is true; set it back to true for any internet-reachable deploy.
+      AUTH_CAPTCHA_ENABLED: "${AUTH_CAPTCHA_ENABLED:-false}"
+      # Only enable behind a proxy that strips untrusted forwarding headers.
+      TRUST_PROXY_HEADERS: "false"
+      LOG_LEVEL: info
+    volumes:
+      - ./.docker/data:/app/data
+      - ./.docker/config:/app/config
+      - ./.docker/logs:/app/logs
+      - ./.docker/backups:/app/backups
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
