@@ -1,0 +1,38 @@
+services:
+  langflow:
+    image: langflowai/langflow:1.10.1
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "7860:7860"
+    environment:
+      LANGFLOW_DATABASE_URL: postgresql://${POSTGRES_USER:-langflow}:${POSTGRES_PASSWORD:-langflow}@postgres:5432/${POSTGRES_DB:-langflow}
+      # Where logs, file storage, monitor data and secret keys are stored.
+      LANGFLOW_CONFIG_DIR: /app/langflow
+      LANGFLOW_HOST: 0.0.0.0
+      LANGFLOW_PORT: "7860"
+    volumes:
+      - .docker/langflow:/app/langflow
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:7860/health').status==200 else 1)\""]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  postgres:
+    image: postgres:16-trixie
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-langflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-langflow}
+      POSTGRES_DB: ${POSTGRES_DB:-langflow}
+    volumes:
+      - .docker/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-langflow} -d ${POSTGRES_DB:-langflow}"]
+      interval: 3s
+      timeout: 3s
+      retries: 10

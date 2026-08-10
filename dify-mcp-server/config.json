@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "dify": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/YanxingLiu/dify-mcp-server", "dify_mcp_server"],
+      "env": {
+        "CONFIG_PATH": "/app/config.yaml"
+      }
+    }
+  }
+}

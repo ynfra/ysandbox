@@ -1,0 +1,12 @@
+services:
+  yellowlabtools:
+    image: ousamabenyounes/yellowlabtools:latest
+    restart: unless-stopped
+    # Chromium (Phantomas/Puppeteer) needs to create user/PID namespaces for its
+    # sandbox; the default Docker seccomp profile blocks the required syscalls,
+    # so every analysis fails with "Failed to move to new namespace". Relaxing
+    # seccomp lets the headless browser launch.
+    security_opt:
+      - seccomp:unconfined
+    ports:
+      - "8383:8383"

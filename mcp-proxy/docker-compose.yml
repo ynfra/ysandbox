@@ -1,0 +1,15 @@
+services:
+  mcp-proxy:
+    image: ghcr.io/tbxark/mcp-proxy:latest
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config.json:/config/config.json
+    healthcheck:
+      # Image ships no curl/wget; use node to TCP-probe the listen port.
+      test: ["CMD", "node", "-e", "require('net').connect(9090,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

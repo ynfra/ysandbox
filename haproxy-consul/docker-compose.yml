@@ -1,0 +1,49 @@
+name: haproxy-consul
+
+services:
+  consul:
+    image: hashicorp/consul:1.21
+    restart: unless-stopped
+    command: consul agent -dev -ui -client=0.0.0.0 -bind=0.0.0.0
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    volumes:
+      - ./.docker/consul/data:/consul/data
+
+  haproxy:
+    image: haproxy:3.2
+    restart: unless-stopped
+    depends_on:
+      - consul
+    ports:
+      - "8080:80"
+      - "8404:8404"
+    user: root
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+
+  app:
+    image: oven/bun:latest
+    restart: unless-stopped
+    command: ["bun", "/app/server.js"]
+    depends_on:
+      - consul
+    volumes:
+      - ./app/server.js:/app/server.js
+    ports:
+      - 3000
+    environment:
+      - SERVICE_NAME=app
+      - SERVICE_3000_CHECK_HTTP=/
+    deploy:
+      replicas: 3
+
+  registrator:
+    image: hypolas/registrator:latest
+    restart: unless-stopped
+    command: -explicit -internal -cleanup -resync 5 consul://consul:8500
+    depends_on:
+      - consul
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock

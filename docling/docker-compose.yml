@@ -1,0 +1,6 @@
+services:
+  docling:
+    image: ghcr.io/ds4sd/docling-serve:latest
+    restart: unless-stopped
+    ports:
+      - "5001:5001"

@@ -1,0 +1,6 @@
+services:
+  paddleocr:
+    build: ./build
+    restart: unless-stopped
+    ports:
+      - "8866:8866"

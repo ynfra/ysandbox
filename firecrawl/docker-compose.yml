@@ -1,0 +1,102 @@
+x-common-service: &common-service
+  image: ghcr.io/firecrawl/firecrawl:latest
+  ulimits:
+    nofile:
+      soft: 65535
+      hard: 65535
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
+      compress: "true"
+
+x-common-env: &common-env
+  REDIS_URL: redis://redis:6379
+  REDIS_RATE_LIMIT_URL: redis://redis:6379
+  PLAYWRIGHT_MICROSERVICE_URL: http://playwright-service:3000/scrape
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_DB: postgres
+  POSTGRES_HOST: nuq-postgres
+  POSTGRES_PORT: "5432"
+  USE_DB_AUTHENTICATION: "false"
+  NUM_WORKERS_PER_QUEUE: "8"
+  CRAWL_CONCURRENT_REQUESTS: "10"
+  MAX_CONCURRENT_JOBS: "5"
+  BROWSER_POOL_SIZE: "5"
+  BULL_AUTH_KEY: firecrawl-sandbox-key
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+  MODEL_NAME: ${MODEL_NAME:-}
+  LOGGING_LEVEL: INFO
+
+services:
+  playwright-service:
+    image: ghcr.io/firecrawl/playwright-service:latest
+    environment:
+      PORT: 3000
+      MAX_CONCURRENT_PAGES: 10
+    cpus: 2.0
+    mem_limit: 4G
+    memswap_limit: 4G
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
+
+  api:
+    <<: *common-service
+    environment:
+      <<: *common-env
+      HOST: "0.0.0.0"
+      PORT: "3002"
+      NUQ_RABBITMQ_URL: amqp://rabbitmq:5672
+      ENV: local
+    depends_on:
+      redis:
+        condition: service_started
+      playwright-service:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "3002:3002"
+    command: node dist/src/harness.js --start-docker
+    restart: unless-stopped
+    cpus: 4.0
+    mem_limit: 8G
+    memswap_limit: 8G
+
+  redis:
+    image: redis:alpine
+    command: redis-server --bind 0.0.0.0 --save 60 1 --loglevel warning
+    volumes:
+      - ./.docker/redis:/data
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    command: rabbitmq-server
+    volumes:
+      - ./.docker/rabbitmq:/var/lib/rabbitmq
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  nuq-postgres:
+    image: ghcr.io/firecrawl/nuq-postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ./.docker/postgres:/var/lib/postgresql/data
+    restart: unless-stopped

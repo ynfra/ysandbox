@@ -1,0 +1,25 @@
+services:
+  crawl4ai:
+    image: unclecode/crawl4ai:latest
+    restart: unless-stopped
+    ports:
+      - "11235:11235"
+    volumes:
+      - /dev/shm:/dev/shm
+    shm_size: "1g"
+    mem_limit: 4g
+    mem_reservation: 1g
+    environment:
+      # crawl4ai >=0.9.0 binds loopback-only unless a credential is present;
+      # without this the published port 11235 is unreachable from the host.
+      # Setting a token makes the entrypoint bind all interfaces AND gates the
+      # API. Sandbox-safe default — override for anything exposed off-host.
+      CRAWL4AI_API_TOKEN: ${CRAWL4AI_API_TOKEN:-crawl4ai-sandbox}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11235/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

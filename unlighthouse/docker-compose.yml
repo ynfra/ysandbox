@@ -1,0 +1,8 @@
+services:
+  unlighthouse:
+    image: ghcr.io/indykoning/unlighthouse-docker:master
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      SITE: https://example.com

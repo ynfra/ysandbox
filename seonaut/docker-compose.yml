@@ -1,0 +1,34 @@
+services:
+  db:
+    image: mysql:8.4
+    platform: linux/amd64
+    restart: unless-stopped
+    volumes:
+      - ./.docker/mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: seonaut
+      MYSQL_USER: seonaut
+      MYSQL_PASSWORD: seonaut
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u root -proot
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  seonaut:
+    image: ghcr.io/stjudewashere/seonaut:latest
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: /app/seonaut
+    environment:
+      SEONAUT_DATABASE_SERVER: db
+      SEONAUT_DATABASE_PORT: "3306"
+      SEONAUT_DATABASE_USER: seonaut
+      SEONAUT_DATABASE_PASSWORD: seonaut
+      SEONAUT_DATABASE_DATABASE: seonaut

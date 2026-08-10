@@ -1,0 +1,28 @@
+services:
+  supergateway:
+    image: supercorp/supergateway:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    command:
+      - "--stdio"
+      - "npx -y @modelcontextprotocol/server-everything"
+      - "--outputTransport"
+      - "sse"
+      - "--port"
+      - "8000"
+      - "--baseUrl"
+      - "http://localhost:8000"
+      - "--ssePath"
+      - "/sse"
+      - "--messagePath"
+      - "/message"
+      - "--healthEndpoint"
+      - "/healthz"
+      - "--cors"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

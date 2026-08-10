@@ -1,0 +1,44 @@
+services:
+  api:
+    image: ghcr.io/danny-avila/librechat:latest
+    restart: unless-stopped
+    ports:
+      - "3080:3080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+    volumes:
+      - ./.docker/images:/app/client/public/images
+      - ./.docker/logs:/app/api/logs
+      - ./librechat.yaml:/app/librechat.yaml:ro
+    env_file:
+      - .env
+
+  mongodb:
+    # Pinned to 8.0.4: newer mongo:8.0 patches refuse to boot on Linux
+    # kernels >= 6.19 (OrbStack 7.0.11 here) — SERVER-121912.
+    image: mongo:8.0.4
+    restart: unless-stopped
+    volumes:
+      - ./.docker/mongodb:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    restart: unless-stopped
+    volumes:
+      - ./.docker/meilisearch:/meili_data
+    environment:
+      MEILI_MASTER_KEY: meili-sandbox-master-key
+      MEILI_NO_ANALYTICS: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

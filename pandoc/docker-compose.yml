@@ -1,0 +1,8 @@
+services:
+  pandoc:
+    image: pandoc/extra:latest
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+      - "3030:3030"
+    entrypoint: ["pandoc", "server", "--timeout", "30"]

@@ -1,0 +1,20 @@
+services:
+  helicone:
+    image: helicone/helicone-all-in-one:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+      - "8585:8585"
+      - "9081:9080"
+    env_file:
+      - .env
+    volumes:
+      - .docker/postgres:/var/lib/postgresql/data
+      - .docker/clickhouse:/var/lib/clickhouse
+      - .docker/minio:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s

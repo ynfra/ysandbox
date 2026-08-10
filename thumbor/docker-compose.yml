@@ -1,0 +1,12 @@
+services:
+  thumbor:
+    image: ghcr.io/minimalcompact/thumbor:latest
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./.docker/data:/data
+    environment:
+      THUMBOR_SECURITY_KEY: thumbor-sandbox-key
+      ALLOW_UNSAFE_URL: "True"
+      THUMBOR_PORT: "8888"

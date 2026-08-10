@@ -1,0 +1,46 @@
+# Traceloop Hub — LLM gateway config (YAML mode)
+# Docs: https://github.com/traceloop/hub
+#
+# The hub binary reads /app/config.yaml at startup (mounted by docker-compose).
+# Provider API keys are interpolated from environment variables; set real keys
+# in .env (OPENAI_API_KEY, ANTHROPIC_API_KEY) to proxy live traffic. The hub
+# still boots and serves /health + /metrics with empty keys.
+
+general:
+  trace_content_enabled: true
+
+providers:
+  - key: openai
+    type: openai
+    api_key: ${OPENAI_API_KEY}
+    base_url: https://api.openai.com/v1
+  - key: anthropic
+    type: anthropic
+    api_key: ${ANTHROPIC_API_KEY}
+  - key: ollama
+    type: openai
+    api_key: "ollama"
+    base_url: http://host.docker.internal:11434/v1
+
+models:
+  - key: gpt-4o
+    type: gpt-4o
+    provider: openai
+  - key: claude-3-5-sonnet
+    type: claude-3-5-sonnet-20241022
+    provider: anthropic
+  - key: llama3
+    type: llama3
+    provider: ollama
+
+pipelines:
+  - name: default
+    type: chat
+    plugins:
+      - logging:
+          level: info
+      - model-router:
+          models:
+            - gpt-4o
+            - claude-3-5-sonnet
+            - llama3

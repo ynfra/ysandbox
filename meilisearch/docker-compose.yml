@@ -1,0 +1,12 @@
+services:
+  meilisearch:
+    image: getmeili/meilisearch:v1.48.3
+    restart: unless-stopped
+    ports:
+      - "7700:7700"
+    environment:
+      MEILI_ENV: development
+      # Sandbox-only key — change for anything but local use
+      MEILI_MASTER_KEY: meili-sandbox-key
+    volumes:
+      - ./.docker/meili_data:/meili_data

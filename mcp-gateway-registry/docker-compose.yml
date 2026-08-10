@@ -1,0 +1,422 @@
+# MCP Gateway & Registry — self-contained ysandbox reference stack.
+#
+# Uses the upstream PRE-BUILT images published to Amazon ECR Public
+# (public.ecr.aws/p3v1o3c6) — no source build required. This mirrors the
+# official docker-compose.prebuilt.yml, adapted for ysandbox conventions:
+#   * registry UI/gateway mapped to host 7860 (HTTP) and 8443 (HTTPS)
+#   * persistent state written under .docker/
+#   * config files mounted from ./config, ./scripts, ./keycloak
+#
+# First run pulls large images (the registry bundles nginx + FastAPI +
+# sentence-transformers models) and seeds MongoDB via scripts/init-mongodb-ce.py.
+
+services:
+  # MongoDB keyfile init — generates the shared replica-set keyfile once.
+  mongodb-keyfile-init:
+    image: alpine:latest
+    container_name: mcp-mongodb-keyfile-init
+    volumes:
+      - mongodb-keyfile:/keyfile
+    command: >
+      sh -c "
+      if [ ! -f /keyfile/replica.key ]; then
+        echo 'Generating MongoDB keyfile...';
+        apk add --no-cache openssl;
+        openssl rand -base64 756 > /keyfile/replica.key;
+        chmod 400 /keyfile/replica.key;
+        chown 999:999 /keyfile/replica.key;
+        echo 'Keyfile generated successfully';
+      else
+        echo 'Keyfile already exists, skipping generation';
+      fi
+      "
+    restart: "no"
+
+  # MongoDB Community Edition — primary storage + semantic search backend.
+  mongodb:
+    image: mongo:${MONGODB_VERSION:-8.2}
+    container_name: mcp-mongodb
+    command: mongod --replSet rs0 --bind_ip 127.0.0.1,mongodb --auth --keyFile /keyfile/replica.key
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DOCUMENTDB_USERNAME:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${DOCUMENTDB_PASSWORD:-admin}
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:27017:27017"
+    volumes:
+      - ./.docker/mongodb/data:/data/db
+      - ./.docker/mongodb/config:/data/configdb
+      - mongodb-keyfile:/keyfile:ro
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - CHOWN
+      - DAC_OVERRIDE
+    depends_on:
+      mongodb-keyfile-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "mongosh", "-u", "${DOCUMENTDB_USERNAME:-admin}", "-p", "${DOCUMENTDB_PASSWORD:-admin}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
+      interval: 60s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # MongoDB init — creates the replica set, indexes, and seeds admin scopes.
+  mongodb-init:
+    image: python:3.14-slim
+    container_name: mcp-mongodb-init
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      - DOCUMENTDB_HOST=mongodb
+      - DOCUMENTDB_PORT=27017
+      - DOCUMENTDB_DATABASE=${DOCUMENTDB_DATABASE:-mcp_registry}
+      - DOCUMENTDB_USERNAME=${DOCUMENTDB_USERNAME:-admin}
+      - DOCUMENTDB_PASSWORD=${DOCUMENTDB_PASSWORD:-admin}
+      - DOCUMENTDB_NAMESPACE=${DOCUMENTDB_NAMESPACE:-default}
+      - ENTRA_GROUP_ADMIN_ID=${ENTRA_GROUP_ADMIN_ID:-}
+    volumes:
+      - ./scripts/init-mongodb-ce.py:/app/scripts/init-mongodb-ce.py:ro
+      - ./scripts/registry-admins.json:/app/scripts/registry-admins.json:ro
+      - ./scripts/mcp-registry-admin.json:/app/scripts/mcp-registry-admin.json:ro
+      - ./scripts/mcp-servers-unrestricted-read.json:/app/scripts/mcp-servers-unrestricted-read.json:ro
+      - ./scripts/mcp-servers-unrestricted-execute.json:/app/scripts/mcp-servers-unrestricted-execute.json:ro
+      - ./scripts/federation-service.json:/app/scripts/federation-service.json:ro
+    command: >
+      sh -c "
+      pip install --quiet motor pymongo &&
+      python /app/scripts/init-mongodb-ce.py
+      "
+    restart: "no"
+
+  # OpenBao — per-user egress credential vault (dev mode, in-memory).
+  openbao:
+    image: openbao/openbao:2.5.5
+    container_name: mcp-openbao
+    command: ["server", "-dev"]
+    environment:
+      - BAO_DEV_ROOT_TOKEN_ID=${OPENBAO_TOKEN:-dev-root-token}
+      - BAO_DEV_LISTEN_ADDRESS=0.0.0.0:8200
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:8200:8200"
+    healthcheck:
+      test: ["CMD", "bao", "status", "-address=http://127.0.0.1:8200"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+  # Registry — nginx reverse-proxy gateway + FastAPI registry + web UI.
+  registry:
+    image: ${ECR_REGISTRY:-public.ecr.aws/p3v1o3c6}/registry:${REGISTRY_VERSION:-latest}
+    container_name: mcp-registry
+    environment:
+      - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-with-gateway}
+      - REGISTRY_MODE=${REGISTRY_MODE:-full}
+      - SHOW_SERVERS_TAB=${SHOW_SERVERS_TAB:-true}
+      - SHOW_VIRTUAL_SERVERS_TAB=${SHOW_VIRTUAL_SERVERS_TAB:-true}
+      - SHOW_SKILLS_TAB=${SHOW_SKILLS_TAB:-true}
+      - SHOW_AGENTS_TAB=${SHOW_AGENTS_TAB:-true}
+      - UI_TITLE=${UI_TITLE:-}
+      - REGISTRY_URL=${REGISTRY_URL:-http://localhost:7860}
+      - REGISTRY_NAME=${REGISTRY_NAME:-AI Registry}
+      - REGISTRY_ORGANIZATION_NAME=${REGISTRY_ORGANIZATION_NAME:-ACME Inc.}
+      - SECRET_KEY=${SECRET_KEY:?Set SECRET_KEY in .env (>=32 chars)}
+      # Shared secret gating nginx->auth-server marker (identical in both services)
+      - AUTH_SERVER_NGINX_MARKER_SECRET=${AUTH_SERVER_NGINX_MARKER_SECRET:?Set AUTH_SERVER_NGINX_MARKER_SECRET in .env (>=32 chars)}
+      # Per-user egress credential vault (off by default; wired to in-stack OpenBao)
+      - EGRESS_AUTH_ENABLED=${EGRESS_AUTH_ENABLED:-false}
+      - SECRET_STORE_BACKEND=${SECRET_STORE_BACKEND:-openbao}
+      - OPENBAO_ADDR=${OPENBAO_ADDR:-http://openbao:8200}
+      - OPENBAO_KV_MOUNT=${OPENBAO_KV_MOUNT:-secret}
+      - OPENBAO_AUTH_METHOD=${OPENBAO_AUTH_METHOD:-token}
+      - OPENBAO_TOKEN=${OPENBAO_TOKEN:-dev-root-token}
+      - AUTH_SERVER_URL=${AUTH_SERVER_URL:-http://auth-server:8888}
+      - AUTH_SERVER_EXTERNAL_URL=${AUTH_SERVER_EXTERNAL_URL:-http://localhost:8888}
+      - HEALTH_CHECK_INTERVAL_SECONDS=${HEALTH_CHECK_INTERVAL_SECONDS:-30}
+      # Metrics (OTel-native; scraped by Prometheus on :9464)
+      - METRICS_API_KEY=${METRICS_API_KEY_REGISTRY:-sandbox-metrics-key}
+      - METRICS_API_KEY_NGINX=${METRICS_API_KEY_REGISTRY:-sandbox-metrics-key}
+      - METRICS_LEGACY_HTTP_POST=${METRICS_LEGACY_HTTP_POST:-false}
+      - OTEL_METRIC_EXPORT_INTERVAL_MS=${OTEL_METRIC_EXPORT_INTERVAL_MS:-15000}
+      - OTEL_EXPORTER_PROMETHEUS_HOST=${OTEL_EXPORTER_PROMETHEUS_HOST:-0.0.0.0}
+      - OTEL_EXPORTER_PROMETHEUS_PORT=${OTEL_EXPORTER_PROMETHEUS_PORT:-9464}
+      # Identity provider (Keycloak recommended for local dev)
+      - AUTH_PROVIDER=${AUTH_PROVIDER:-keycloak}
+      - KEYCLOAK_ENABLED=${KEYCLOAK_ENABLED:-true}
+      - KEYCLOAK_URL=${KEYCLOAK_URL:-http://keycloak:8080}
+      - KEYCLOAK_EXTERNAL_URL=${KEYCLOAK_EXTERNAL_URL:-http://localhost:8080}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM:-mcp-gateway}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-mcp-gateway-web}
+      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET:-}
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN:-admin}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      - KEYCLOAK_M2M_CLIENT_ID=${KEYCLOAK_M2M_CLIENT_ID:-mcp-gateway-m2m}
+      - KEYCLOAK_M2M_CLIENT_SECRET=${KEYCLOAK_M2M_CLIENT_SECRET:-}
+      # Storage backend
+      - STORAGE_BACKEND=${STORAGE_BACKEND:-mongodb-ce}
+      - DOCUMENTDB_HOST=${DOCUMENTDB_HOST:-mongodb}
+      - DOCUMENTDB_PORT=${DOCUMENTDB_PORT:-27017}
+      - DOCUMENTDB_USERNAME=${DOCUMENTDB_USERNAME:-admin}
+      - DOCUMENTDB_PASSWORD=${DOCUMENTDB_PASSWORD:-admin}
+      - DOCUMENTDB_DATABASE=${DOCUMENTDB_DATABASE:-mcp_registry}
+      - DOCUMENTDB_NAMESPACE=${DOCUMENTDB_NAMESPACE:-default}
+      - DOCUMENTDB_REPLICA_SET=${DOCUMENTDB_REPLICA_SET:-rs0}
+      - DOCUMENTDB_USE_TLS=${DOCUMENTDB_USE_TLS:-false}
+      # Embeddings (bundled sentence-transformers model)
+      - EMBEDDINGS_PROVIDER=${EMBEDDINGS_PROVIDER:-sentence-transformers}
+      - EMBEDDINGS_MODEL_NAME=${EMBEDDINGS_MODEL_NAME:-all-MiniLM-L6-v2}
+      - EMBEDDINGS_MODEL_DIMENSIONS=${EMBEDDINGS_MODEL_DIMENSIONS:-384}
+      # Security scanning
+      - SECURITY_SCAN_ENABLED=${SECURITY_SCAN_ENABLED:-true}
+      - SECURITY_ANALYZERS=${SECURITY_ANALYZERS:-yara}
+      # Anonymous telemetry disabled for the sandbox
+      - MCP_TELEMETRY_DISABLED=${MCP_TELEMETRY_DISABLED:-1}
+      # Application logging
+      - APP_LOG_LEVEL=${APP_LOG_LEVEL:-INFO}
+      - APP_LOG_DIR=${APP_LOG_DIR:-/var/log/containers/ai-registry}
+    ports:
+      - "7860:8080"   # registry UI + gateway (HTTP, non-root nginx)
+      - "8443:8443"   # gateway (HTTPS, self-signed by default)
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    volumes:
+      - ./.docker/registry/servers:/app/registry/servers
+      - ./.docker/registry/agents:/app/registry/agents
+      - ./.docker/registry/models:/app/registry/models
+      - ./.docker/registry/logs:/app/logs
+      - ./.docker/registry/security_scans:/app/security_scans
+      - ./.docker/registry/applog:/var/log/containers/ai-registry
+      - ./config/federation.json:/app/config/federation.json
+    depends_on:
+      auth-server:
+        condition: service_started
+      mongodb-init:
+        condition: service_completed_successfully
+      openbao:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Auth server — OAuth/OIDC broker and token minting (scalable, stateless).
+  auth-server:
+    image: ${ECR_REGISTRY:-public.ecr.aws/p3v1o3c6}/auth-server:${AUTH_SERVER_VERSION:-latest}
+    container_name: mcp-auth-server
+    environment:
+      - REGISTRY_URL=${REGISTRY_URL:-http://localhost:7860}
+      - SECRET_KEY=${SECRET_KEY:?Set SECRET_KEY in .env (>=32 chars)}
+      - AUTH_SERVER_EXTERNAL_URL=${AUTH_SERVER_EXTERNAL_URL:-http://localhost:8888}
+      - AUTH_SERVER_NGINX_MARKER_SECRET=${AUTH_SERVER_NGINX_MARKER_SECRET:?Set AUTH_SERVER_NGINX_MARKER_SECRET in .env (>=32 chars)}
+      - EGRESS_AUTH_ENABLED=${EGRESS_AUTH_ENABLED:-false}
+      - EGRESS_REGISTRY_INTERNAL_URL=${EGRESS_REGISTRY_INTERNAL_URL:-http://registry:8080}
+      # Metrics
+      - METRICS_API_KEY=${METRICS_API_KEY_AUTH_SERVER:-sandbox-metrics-key}
+      - METRICS_LEGACY_HTTP_POST=${METRICS_LEGACY_HTTP_POST:-false}
+      - OTEL_METRIC_EXPORT_INTERVAL_MS=${OTEL_METRIC_EXPORT_INTERVAL_MS:-15000}
+      - OTEL_EXPORTER_PROMETHEUS_HOST=${OTEL_EXPORTER_PROMETHEUS_HOST:-0.0.0.0}
+      - OTEL_EXPORTER_PROMETHEUS_PORT=${OTEL_EXPORTER_PROMETHEUS_PORT:-9464}
+      # Identity provider
+      - AUTH_PROVIDER=${AUTH_PROVIDER:-keycloak}
+      - KEYCLOAK_ENABLED=${KEYCLOAK_ENABLED:-true}
+      - KEYCLOAK_URL=${KEYCLOAK_URL:-http://keycloak:8080}
+      - KEYCLOAK_EXTERNAL_URL=${KEYCLOAK_EXTERNAL_URL:-http://localhost:8080}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM:-mcp-gateway}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-mcp-gateway-web}
+      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET:-}
+      - KEYCLOAK_M2M_CLIENT_ID=${KEYCLOAK_M2M_CLIENT_ID:-mcp-gateway-m2m}
+      - KEYCLOAK_M2M_CLIENT_SECRET=${KEYCLOAK_M2M_CLIENT_SECRET:-}
+      # Storage backend
+      - STORAGE_BACKEND=${STORAGE_BACKEND:-mongodb-ce}
+      - DOCUMENTDB_HOST=${DOCUMENTDB_HOST:-mongodb}
+      - DOCUMENTDB_PORT=${DOCUMENTDB_PORT:-27017}
+      - DOCUMENTDB_USERNAME=${DOCUMENTDB_USERNAME:-admin}
+      - DOCUMENTDB_PASSWORD=${DOCUMENTDB_PASSWORD:-admin}
+      - DOCUMENTDB_DATABASE=${DOCUMENTDB_DATABASE:-mcp_registry}
+      - DOCUMENTDB_NAMESPACE=${DOCUMENTDB_NAMESPACE:-default}
+      - DOCUMENTDB_REPLICA_SET=${DOCUMENTDB_REPLICA_SET:-rs0}
+      - DOCUMENTDB_USE_TLS=${DOCUMENTDB_USE_TLS:-false}
+      # Application logging
+      - APP_LOG_LEVEL=${APP_LOG_LEVEL:-INFO}
+      - APP_LOG_DIR=${APP_LOG_DIR:-/var/log/containers/ai-registry}
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:8888:8888"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    volumes:
+      - ./.docker/auth/logs:/app/logs
+      - ./.docker/auth/applog:/var/log/containers/ai-registry
+    depends_on:
+      mongodb-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # MCP Gateway server — the mcpgw MCP server exposing registry tools.
+  mcpgw-server:
+    image: ${ECR_REGISTRY:-public.ecr.aws/p3v1o3c6}/mcpgw:${MCPGW_VERSION:-latest}
+    container_name: mcp-mcpgw-server
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8003
+      - REGISTRY_BASE_URL=http://registry:8080
+      - APP_LOG_LEVEL=${APP_LOG_LEVEL:-INFO}
+      - APP_LOG_DIR=${APP_LOG_DIR:-/var/log/containers/ai-registry}
+      - METRICS_LEGACY_HTTP_POST=${METRICS_LEGACY_HTTP_POST:-false}
+      - OTEL_METRIC_EXPORT_INTERVAL_MS=${OTEL_METRIC_EXPORT_INTERVAL_MS:-15000}
+      - OTEL_EXPORTER_PROMETHEUS_HOST=${OTEL_EXPORTER_PROMETHEUS_HOST:-0.0.0.0}
+      - OTEL_EXPORTER_PROMETHEUS_PORT=${OTEL_EXPORTER_PROMETHEUS_PORT:-9464}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    volumes:
+      - ./.docker/registry/servers:/app/registry/servers
+      - ./.docker/registry/models:/app/registry/models
+      - ./.docker/mcpgw/applog:/var/log/containers/ai-registry
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:8003:8003"
+    depends_on:
+      - registry
+    restart: unless-stopped
+
+  # Prometheus — scrapes OTel-native metrics from the core services.
+  prometheus:
+    image: prom/prometheus:${PROMETHEUS_VERSION:-v3.11.3}
+    container_name: mcp-prometheus
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./.docker/prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+  # Grafana — dashboards over the Prometheus metrics.
+  grafana:
+    image: grafana/grafana:${GRAFANA_VERSION:-12.3.1}
+    container_name: mcp-grafana
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+    volumes:
+      - ./.docker/grafana:/var/lib/grafana
+      - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./config/grafana/datasources:/etc/grafana/provisioning/datasources
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  # PostgreSQL — backing store for Keycloak.
+  keycloak-db:
+    image: postgres:${POSTGRES_VERSION:-16-alpine}
+    container_name: mcp-keycloak-db
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak}
+    volumes:
+      - ./.docker/keycloak-db:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Keycloak — identity provider (OIDC) for the registry and auth-server.
+  keycloak:
+    image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION:-25.0}
+    container_name: mcp-keycloak
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HTTP_ENABLED: 'true'
+      KC_HTTP_PORT: 8080
+      KC_HOSTNAME_STRICT: 'false'
+      KC_HOSTNAME_STRICT_HTTPS: 'false'
+      KC_PROXY: edge
+      KC_FRONTEND_URL: ${KEYCLOAK_EXTERNAL_URL:-http://localhost:8080}
+      KC_FEATURES: token-exchange,admin-api
+      KC_LOG_LEVEL: INFO
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:8080:8080"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    volumes:
+      - ./keycloak/themes:/opt/keycloak/themes
+      - ./keycloak/providers:/opt/keycloak/providers
+      - ./keycloak/import:/opt/keycloak/data/import
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # PingFederate — optional alternative IdP. Disabled unless the
+  # "pingfederate" profile is enabled (requires a Ping DevOps EULA + creds).
+  pingfederate:
+    image: pingidentity/pingfederate:13.0.2
+    container_name: mcp-pingfederate
+    profiles: ["pingfederate"]
+    environment:
+      - PING_IDENTITY_ACCEPT_EULA=${PING_IDENTITY_ACCEPT_EULA:-NO}
+      - PING_IDENTITY_DEVOPS_USER=${PING_IDENTITY_DEVOPS_USER:-}
+      - PING_IDENTITY_DEVOPS_KEY=${PING_IDENTITY_DEVOPS_KEY:-}
+      - SERVER_PROFILE_URL=https://github.com/pingidentity/pingidentity-server-profiles.git
+      - SERVER_PROFILE_PATH=getting-started/pingfederate
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:9031:9031"
+      - "${HOST_BIND_IP:-127.0.0.1}:9999:9999"
+    volumes:
+      - ./.docker/pingfederate:/opt/out/instance/server/default/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -ksf https://localhost:9031/pf/heartbeat.ping || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 180s
+
+volumes:
+  # Shared MongoDB replica-set keyfile (needs chown 999; kept as a named volume).
+  mongodb-keyfile:
