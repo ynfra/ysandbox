@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/sourcebot-dev/sourcebot/v5.1.16/schemas/v3/index.json",
+  "settings": {
+    "resyncConnectionIntervalMs": 60000,
+    "reindexIntervalMs": 60000
+  },
+  "connections": {
+    "forgejo-lab": {
+      "type": "gitea",
+      "url": "http://forgejo:3000",
+      "orgs": ["lab"]
+    }
+  },
+  "models": [
+    {
+      "provider": "openai-compatible",
+      "baseUrl": "http://litellm:4000/v1",
+      "model": "chat",
+      "displayName": "Lab chat (qwen2.5-coder:3b)",
+      "token": { "env": "LAB_KEY" }
+    }
+  ]
+}

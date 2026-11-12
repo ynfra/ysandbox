@@ -1,0 +1,14 @@
+version: 1
+default_mode: propose
+default_approvals: 1
+rules:
+  # Docs merge themselves as soon as one maintainer approves.
+  - paths: ["docs/**"]
+    mode: propose
+    approvals: 1
+    auto_merge: true
+  # Runbooks are critical: two approvals, maintainers only.
+  - paths: ["runbooks/**"]
+    mode: propose
+    approvals: 2
+    reviewers: ["role:maintainer"]

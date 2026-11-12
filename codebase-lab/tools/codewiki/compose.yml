@@ -1,0 +1,67 @@
+# codewiki: LLM-written repo documentation (dependency graph + chat model).
+# Paths are relative to this folder. Output: ../../.docker/codewiki/<repo>/.
+# The MCP server is stdio wrapped by supergateway; it serves ONE repo (CODEWIKI_REPO).
+x-codewiki-build: &build
+  build:
+    context: .
+  image: codewiki:v2.0.0
+
+x-codewiki-env: &env
+  LAB_KEY: ${LAB_KEY:-sk-codebase-lab}
+  LLM_BASE_URL: http://litellm:4000/v1
+  CODEWIKI_MODEL: ${CODEWIKI_MODEL:-chat}
+
+services:
+  # MCP (Streamable HTTP) on 4380 /mcp. Upstream's MCP mode is IDE-driven: the
+  # tools use no LLM, the connecting agent does the writing.
+  codewiki:
+    profiles: ["codewiki"]
+    <<: *build
+    restart: unless-stopped
+    user: "0:0"
+    ports:
+      - "4380:4380"
+    environment:
+      <<: *env
+    working_dir: /repos/${CODEWIKI_REPO:-zustand}
+    volumes:
+      # rw: `codewiki mcp` keeps its session workspace in <repo>/.codewiki
+      - ../../.docker/repos:/repos
+      - ../../.docker/codewiki:/data/out
+    command: ["supergateway", "--stdio", "codewiki mcp", "--outputTransport", "streamableHttp", "--port", "4380", "--streamableHttpPath", "/mcp", "--stateful", "--sessionTimeout", "3600000"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import socket;socket.create_connection(('127.0.0.1',4380),timeout=5).close()\""]
+      interval: 10s
+      timeout: 6s
+      retries: 6
+      start_period: 15s
+
+  # One-shot generator (benchmark times this): `codewiki-index <repo> [flags]`.
+  codewiki-index:
+    profiles: ["codewiki"]
+    <<: *build
+    user: "0:0"
+    environment:
+      <<: *env
+    volumes:
+      - ../../.docker/repos:/repos:ro
+      - ../../.docker/codewiki:/data/out
+      - ./gen.sh:/gen.sh:ro
+    command: ["/gen.sh", "zustand"]
+
+  # Auto-update: git-sync POSTs {"repo",...}; for CODEWIKI_REPO this runs
+  # `codewiki generate --update`. Add http://codewiki-hook:8080/ to
+  # SYNC_NOTIFY_URLS. Internal only.
+  codewiki-hook:
+    profiles: ["codewiki"]
+    <<: *build
+    restart: unless-stopped
+    user: "0:0"
+    environment:
+      <<: *env
+      CODEWIKI_REPO: ${CODEWIKI_REPO:-zustand}
+    volumes:
+      - ../../.docker/repos:/repos:ro
+      - ../../.docker/codewiki:/data/out
+      - ./hook.py:/hook.py:ro
+    command: ["python", "/hook.py"]

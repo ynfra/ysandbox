@@ -1,0 +1,11 @@
+{
+  "tool": "codebase-memory-mcp",
+  "repo": "react",
+  "kind": "index",
+  "at": "2026-11-01T21:32:20.073Z",
+  "ok": true,
+  "seconds": 16,
+  "peak_mib": 0,
+  "disk_mib": 148,
+  "error": null
+}

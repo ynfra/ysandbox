@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Board</title>
+<style>
+:root { color-scheme: light dark; --card: Canvas; }
+body { font: 14px/1.4 system-ui, sans-serif; margin: 0; padding: 1rem; }
+h1 { font-size: 1.2rem; }
+.board { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 1rem; align-items: start; }
+.col { background: #8881; border-radius: 8px; padding: .6rem; min-height: 8rem; }
+.col h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; margin: 0 0 .6rem; opacity: .7; }
+.card { background: var(--card); border: 1px solid #8884; border-radius: 6px; padding: .5rem .6rem; margin-bottom: .5rem; cursor: grab; }
+.meta { display: flex; justify-content: space-between; font-size: .75rem; opacity: .75; margin-top: .3rem; }
+.moves button { font-size: .7rem; margin-right: .2rem; }
+@media (max-width: 700px) { .board { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<h1>Sprint board</h1>
+<div class="board" id="board"></div>
+<script type="module">
+import { sql } from "/_api/client.js";
+const STATUSES = ["To Do", "In Progress", "Done"];
+const board = document.getElementById("board");
+
+async function move(key, status) {
+  await sql("UPDATE issues SET status = ? WHERE key = ?", [status, key]);
+  load();
+}
+
+async function load() {
+  const { rows } = await sql("SELECT * FROM issues ORDER BY key");
+  board.replaceChildren(...STATUSES.map((status) => {
+    const col = document.createElement("section");
+    col.className = "col";
+    const items = rows.filter((r) => r.status === status);
+    col.innerHTML = `<h2></h2>`;
+    col.firstChild.textContent = `${status} (${items.length})`;
+    col.ondragover = (e) => e.preventDefault();
+    col.ondrop = (e) => move(e.dataTransfer.getData("text/plain"), status);
+    for (const r of items) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.draggable = true;
+      card.ondragstart = (e) => e.dataTransfer.setData("text/plain", r.key);
+      const title = document.createElement("div");
+      title.textContent = `${r.key} ${r.summary}`;
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.textContent = `${r.assignee} - ${r.priority} - ${r.story_points} pts`;
+      const moves = document.createElement("div");
+      moves.className = "moves";
+      for (const s of STATUSES.filter((s) => s !== status)) {
+        const b = document.createElement("button");
+        b.textContent = "-> " + s;
+        b.onclick = () => move(r.key, s);
+        moves.append(b);
+      }
+      card.append(title, meta, moves);
+      col.append(card);
+    }
+    return col;
+  }));
+}
+load();
+</script>
+</body>
+</html>

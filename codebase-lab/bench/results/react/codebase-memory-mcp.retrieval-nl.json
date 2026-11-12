@@ -1,0 +1,215 @@
+{
+  "tool": "codebase-memory-mcp",
+  "repo": "react",
+  "kind": "retrieval-nl",
+  "at": "2026-11-02T07:57:45.626Z",
+  "summary": {
+    "hit_rate": 0.5,
+    "recall": 0.4208333333333333,
+    "p50_ms": 246,
+    "avg_tokens": 2424,
+    "errors": 0
+  },
+  "rows": [
+    {
+      "id": "L1",
+      "category": "lookup",
+      "ms": 303,
+      "chars": 11912,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.compiler.crates.react_compiler_validation.src.validate_no_set_state_in_render.is_set_state_id Function compiler/crates/react_compiler_validation/src/validate_no_set_state_in_render.rs 38-46 -30.83\n  repos-react.compiler.crates.react_compiler_hir.src.lib.is_use_state_type Function compiler/crates/react_compiler_hir/src/lib.rs 1536-1538 -30"
+    },
+    {
+      "id": "L2",
+      "category": "lookup",
+      "ms": 273,
+      "chars": 9082,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.fixtures.dom.public.act-dom.ticker Function fixtures/dom/public/act-dom.html 22-25 -23.08\n  repos-react.fixtures.dom.public.act-dom.testAsyncAct Function fixtures/dom/public/act-dom.html 32-39 -22.89\n  repos-react.fixtures.dom.public.renderer.prerender Function fixtures/dom/public/renderer.js 59-92 -22.85\n  repos-react.fixtures.dom.public"
+    },
+    {
+      "id": "L3",
+      "category": "lookup",
+      "ms": 1937,
+      "chars": 10101,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.fixtures.legacy-jsx-runtimes.react-17.cjs.react-jsx-runtime.production.min.q Function fixtures/legacy-jsx-runtimes/react-17/cjs/react-jsx-runtime.production.min.js 10-10 -30.05\n  repos-react.fixtures.legacy-jsx-runtimes.react-15.cjs.react-jsx-runtime.production.min.q Function fixtures/legacy-jsx-runtimes/react-15/cjs/react-jsx-runtime.pro"
+    },
+    {
+      "id": "L4",
+      "category": "lookup",
+      "ms": 211,
+      "chars": 9127,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.compiler.crates.react_compiler_inference.src.infer_mutation_aliasing_effects.InferenceState.is_defined Method compiler/crates/react_compiler_inference/src/infer_mutation_aliasing_effects.rs 555-557 -20.64\n  repos-react.compiler.crates.react_compiler_diagnostics.src.js_string.paired_halves_render_as_the_supplementary_character Function com"
+    },
+    {
+      "id": "L5",
+      "category": "lookup",
+      "ms": 201,
+      "chars": 9066,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.packages.scheduler.npm.umd.scheduler.development.unstable_scheduleCallback Function packages/scheduler/npm/umd/scheduler.development.js 27-32 -31.38\n  repos-react.packages.scheduler.npm.umd.scheduler.production.min.unstable_scheduleCallback Function packages/scheduler/npm/umd/scheduler.production.min.js 27-32 -31.1\n  repos-react.packages."
+    },
+    {
+      "id": "C1",
+      "category": "callgraph",
+      "ms": 252,
+      "chars": 12214,
+      "recall": 0.6666666666666666,
+      "hit": true,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.ReactFiberWorkLoop.scheduleUpdateOnFiber Function packages/react-reconciler/src/ReactFiberWorkLoop.js 987-1113 -30.05\n  repos-react.packages.react-reconciler.src.ReactFiberHooks.scheduleUpdateOnFiber Function packages/react-reconciler/src/ReactFiberHooks.js 3814-3831 -30.05\n  repos-react.compiler.packages.bab"
+    },
+    {
+      "id": "C2",
+      "category": "callgraph",
+      "ms": 210,
+      "chars": 9733,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.packages.react-art.src.ReactFiberConfigART.resolveUpdatePriority Function packages/react-art/src/ReactFiberConfigART.js 391-393 -22.8\n  repos-react.packages.react-art.src.ReactFiberConfigART.setCurrentUpdatePriority Function packages/react-art/src/ReactFiberConfigART.js 383-385 -22.63\n  repos-react.packages.react-art.src.ReactFiberConfigA"
+    },
+    {
+      "id": "C3",
+      "category": "callgraph",
+      "ms": 226,
+      "chars": 10475,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.packages.react-server.src.ReactFizzServer.renderSuspenseBoundary Function packages/react-server/src/ReactFizzServer.js 1474-5466 -28.01\n  repos-react.packages.react-reconciler.src.ReactFiberWorkLoop.retryDehydratedSuspenseBoundary Function packages/react-reconciler/src/ReactFiberWorkLoop.js 5155-5162 -23.78\n  repos-react.packages.react-re"
+    },
+    {
+      "id": "C4",
+      "category": "callgraph",
+      "ms": 238,
+      "chars": 9754,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.ReactFiberCommitWork.commitMutationEffectsOnFiber Function packages/react-reconciler/src/ReactFiberCommitWork.js 2072-2721 -28.6\n  repos-react.packages.react-reconciler.src.ReactFiberCommitWork.commitBeforeMutationEffectsOnFiber Function packages/react-reconciler/src/ReactFiberCommitWork.js 483-579 -28.37\n  r"
+    },
+    {
+      "id": "C5",
+      "category": "callgraph",
+      "ms": 232,
+      "chars": 12485,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 44  (cols: qn label file lines rank)\n  __route__ANY__/this-is-a-very-long-directory-name-what-happens/ Route - - -27.81\n  repos-react.compiler.packages.babel-plugin-react-compiler.src.__tests__.fixtures.compiler.validate-no-set-state-in-render-uncalled-function-with-mutable-range-is-valid.Component Function compiler/packages/babel-plugin-react-compiler/src/__tests__/fixtures/compiler/vali"
+    },
+    {
+      "id": "A1",
+      "category": "architecture",
+      "ms": 251,
+      "chars": 8917,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.compiler.crates.react_compiler_validation.src.validate_no_ref_access_in_render.next_ref_id Function compiler/crates/react_compiler_validation/src/validate_no_ref_access_in_render.rs 28-30 -23.72\n  repos-react.packages.react-reconciler.src.ReactFiberWorkLoop.getEntangledRenderLanes Function packages/react-reconciler/src/ReactFiberWorkLoop."
+    },
+    {
+      "id": "A2",
+      "category": "architecture",
+      "ms": 2132,
+      "chars": 9056,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.ReactFiberScope.getSuspenseFallbackChild Function packages/react-reconciler/src/ReactFiberScope.js 27-29 -24.04\n  repos-react.packages.react-reconciler.src.ReactFiberSuspenseContext.pushFallbackTreeSuspenseHandler Function packages/react-reconciler/src/ReactFiberSuspenseContext.js 104-109 -23.86\n  repos-react"
+    },
+    {
+      "id": "A3",
+      "category": "architecture",
+      "ms": 274,
+      "chars": 8451,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.packages.react-devtools.app.attachListeners Function packages/react-devtools/app.html 210-229 -38.14\n  repos-react.packages.react-dom-bindings.src.events.DOMPluginEventSystem.accumulateEnterLeaveListenersForEvent Function packages/react-dom-bindings/src/events/DOMPluginEventSystem.js 900-944 -30.24\n  repos-react.packages.react-art.src.Rea"
+    },
+    {
+      "id": "A4",
+      "category": "architecture",
+      "ms": 1763,
+      "chars": 8106,
+      "recall": 0.5,
+      "hit": true,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.ReactFiberCompleteWork.doesRequireClone Function packages/react-reconciler/src/ReactFiberCompleteWork.js 219-243 -23.88\n  repos-react.packages.scheduler.src.forks.Scheduler.shouldYieldToHost Function packages/scheduler/src/forks/Scheduler.js 459-472 -22.07\n  repos-react.scripts.rollup.build-all-release-channe"
+    },
+    {
+      "id": "A5",
+      "category": "architecture",
+      "ms": 208,
+      "chars": 9043,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.__tests__.ReactSuspenseWithNoopRenderer-test.Child Function packages/react-reconciler/src/__tests__/ReactSuspenseWithNoopRenderer-test.js 3960-3968 -22.19\n  repos-react.packages.react-reconciler.src.__tests__.ReactUse-test.Child Function packages/react-reconciler/src/__tests__/ReactUse-test.js 2276-2278 -22.1"
+    },
+    {
+      "id": "I1",
+      "category": "impact",
+      "ms": 211,
+      "chars": 9878,
+      "recall": 0.25,
+      "hit": true,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.ReactFiberWorkLoop.requestUpdateLane Function packages/react-reconciler/src/ReactFiberWorkLoop.js 812-868 -26.89\n  repos-react.compiler.crates.react_compiler_hir.src.environment.Environment.has_no_alias_signature Method compiler/crates/react_compiler_hir/src/environment.rs 1014-1020 -22.08\n  repos-react.compi"
+    },
+    {
+      "id": "I2",
+      "category": "impact",
+      "ms": 246,
+      "chars": 8758,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.scripts.rollup.build-all-release-channels.updatePackageVersions Function scripts/rollup/build-all-release-channels.js 415-472 -21.1\n  repos-react.packages.scheduler.src.forks.SchedulerPostTask.unstable_shouldYield Function packages/scheduler/src/forks/SchedulerPostTask.js 61-63 -19.25\n  repos-react.packages.react-devtools-shared.src.hooks"
+    },
+    {
+      "id": "I3",
+      "category": "impact",
+      "ms": 210,
+      "chars": 9755,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.compiler.crates.react_compiler_inference.src.infer_mutation_aliasing_effects.InferenceState.is_defined Method compiler/crates/react_compiler_inference/src/infer_mutation_aliasing_effects.rs 555-557 -30.28\n  repos-react.compiler.apps.playground.lib.stores.store.isValidStore Function compiler/apps/playground/lib/stores/store.ts 43-50 -24.28"
+    },
+    {
+      "id": "I4",
+      "category": "impact",
+      "ms": 212,
+      "chars": 9202,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.compiler.crates.react_compiler_inference.src.infer_mutation_aliasing_effects.InferenceState.is_defined Method compiler/crates/react_compiler_inference/src/infer_mutation_aliasing_effects.rs 555-557 -32.15\n  repos-react.packages.react-reconciler.src.ReactFiberWorkLoop.flushPassiveEffects Function packages/react-reconciler/src/ReactFiberWor"
+    },
+    {
+      "id": "I5",
+      "category": "impact",
+      "ms": 271,
+      "chars": 8765,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.packages.react-dom-bindings.src.client.ReactInputSelection.containsNode Function packages/react-dom-bindings/src/client/ReactInputSelection.js 17-33 -30.14\n  repos-react.packages.react-dom.src.client.ReactDOMRoot.scheduleHydration Function packages/react-dom/src/client/ReactDOMRoot.js 268-272 -29.9\n  repos-react.packages.react-dom.src.cli"
+    }
+  ]
+}

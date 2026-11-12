@@ -1,0 +1,126 @@
+name: codebase-lab
+
+# Core services start with a plain `docker compose up`. Every indexer under
+# test lives in tools/<tool>/compose.yml behind its own profile, so they never
+# start by accident: on a 12 GB VM, running all of them while one indexes React
+# skews the very RAM numbers the benchmark records.
+include:
+  - tools/sourcebot/compose.yml
+  - tools/codebase-memory-mcp/compose.yml
+  - tools/code-graph-rag/compose.yml
+  - tools/codegraphcontext/compose.yml
+  - tools/opendeepwiki/compose.yml
+  - tools/codewiki/compose.yml
+  - tools/graphify/compose.yml
+
+services:
+  # The git provider the lab pulls from. Repos are seeded by `make seed`;
+  # anything pushed here later reaches every indexer through git-sync.
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:17.0.1
+    restart: unless-stopped
+    ports:
+      - "4310:3000"
+    environment:
+      USER_UID: "1000"
+      USER_GID: "1000"
+      FORGEJO__security__INSTALL_LOCK: "true"
+      FORGEJO__database__DB_TYPE: sqlite3
+      FORGEJO__server__ROOT_URL: http://localhost:4310/
+      FORGEJO__server__HTTP_PORT: "3000"
+      FORGEJO__service__DISABLE_REGISTRATION: "true"
+      # Without this Forgejo refuses to deliver webhooks to git-sync, because
+      # Docker network addresses count as private and private is denied by default.
+      FORGEJO__webhook__ALLOWED_HOST_LIST: private,loopback
+      # Large pushes (React) exceed the default.
+      FORGEJO__server__LFS_START_SERVER: "false"
+    volumes:
+      - ./.docker/forgejo:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/api/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  # CPU-only fallback so the lab works with nothing installed on the host.
+  # For real numbers point OLLAMA_BASE_URL at Ollama on the Mac (Metal GPU);
+  # this container then idles. See README "Models".
+  ollama:
+    image: ollama/ollama:0.40.13
+    restart: unless-stopped
+    ports:
+      - "4322:11434"
+    environment:
+      # Ollama's default context silently truncates long prompts (OpenDeepWiki's
+      # catalog prompt went 6814 -> 2050 tokens and the model returned nothing).
+      # Only affects this container; set the same on Mac Ollama if you use it.
+      OLLAMA_CONTEXT_LENGTH: ${OLLAMA_CONTEXT_LENGTH:-16384}
+    volumes:
+      - ./.docker/ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # One-shot: pulls CHAT_MODEL and EMBED_MODEL into whichever Ollama
+  # OLLAMA_BASE_URL points at. Re-run with `make models` after changing them.
+  ollama-pull:
+    image: ollama/ollama:0.40.13
+    profiles: ["models"]
+    environment:
+      OLLAMA_HOST: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      CHAT_MODEL: ${CHAT_MODEL:-qwen2.5-coder:3b}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
+    entrypoint: ["sh", "-c", "ollama pull \"$$CHAT_MODEL\" && ollama pull \"$$EMBED_MODEL\" && ollama list"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  # Every tool talks to models only through here, as plain OpenAI-compatible
+  # `chat` and `embed`. Swapping CPU Ollama for the Mac, or for ydocker's
+  # litellm later, changes OLLAMA_BASE_URL and nothing in any tool.
+  litellm:
+    image: ghcr.io/berriai/litellm:v1.106.6
+    restart: unless-stopped
+    ports:
+      - "4320:4000"
+    environment:
+      LITELLM_MASTER_KEY: ${LAB_KEY:-sk-codebase-lab}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+      CHAT_MODEL_ID: ollama_chat/${CHAT_MODEL:-qwen2.5-coder:3b}
+      EMBED_MODEL_ID: ollama/${EMBED_MODEL:-nomic-embed-text}
+    volumes:
+      - ./litellm/config.yaml:/app/config.yaml:ro
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:4000/health/liveliness',timeout=4)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  # Auto-pull. Mirrors every repo of the `lab` org from Forgejo into
+  # ./.docker/repos/<name> (polling + webhook), which indexers mount read-only.
+  git-sync:
+    build: ./git-sync
+    image: codebase-lab/git-sync:local
+    restart: unless-stopped
+    user: "1000:1000"
+    ports:
+      - "4311:8080"
+    environment:
+      FORGEJO_URL: http://forgejo:3000
+      FORGEJO_ORG: lab
+      SYNC_INTERVAL: ${SYNC_INTERVAL:-60}
+      # Comma-separated URLs that get POST {"repo","head","path"} after a
+      # repo changes. For indexers without their own watcher.
+      # Hooks of tools without their own watcher. A stopped hook just logs a
+      # failed notify; the sync itself is unaffected.
+      NOTIFY_URLS: ${SYNC_NOTIFY_URLS:-http://graphify-hook:8080/,http://code-graph-rag-hook:8080/,http://codewiki-hook:8080/}
+    volumes:
+      - ./.docker/repos:/repos
+    depends_on:
+      forgejo:
+        condition: service_healthy

@@ -1,0 +1,87 @@
+# code-graph-rag: tree-sitter graph in embedded SQLite (no Memgraph), native
+# Streamable HTTP MCP. Paths are relative to this folder.
+x-cgr-build: &build
+  context: .
+  dockerfile: Dockerfile
+  args:
+    CGR_VERSION: ${CGR_VERSION:-0.3.13}
+
+x-cgr-env: &env
+  CGR_HOME: /data
+  CGR_QUIET: "true"
+  CGR_SPONSOR_PLEDGE: "false"
+  # LLM roles use native Ollama. The litellm_proxy provider probes LiteLLM's
+  # /health, which pings every backend model and times out while Ollama is busy
+  # (every NL tool then fails with "proxy not responding"); /api/tags is instant.
+  # Only the NL tools use a model; indexing and graph queries never do.
+  OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+  ORCHESTRATOR_PROVIDER: ollama
+  ORCHESTRATOR_MODEL: ${CHAT_MODEL:-qwen2.5-coder:3b}
+  CYPHER_PROVIDER: ollama
+  CYPHER_MODEL: ${CHAT_MODEL:-qwen2.5-coder:3b}
+  # Embeddings (semantic_search) via LiteLLM `embed`; off by default so the
+  # index is LLM-free. Set CGR_SKIP_EMBEDDINGS=false to enable.
+  CGR_SKIP_EMBEDDINGS: ${CGR_SKIP_EMBEDDINGS:-true}
+  CGR_EMBEDDING_PROVIDER: openai
+  OPENAI_EMBEDDING_BASE_URL: http://litellm:4000/v1
+  OPENAI_EMBEDDING_MODEL: embed
+  OPENAI_EMBEDDING_API_KEY: sk-codebase-lab
+  OPENAI_EMBEDDING_DIMENSIONS: "768"
+
+services:
+  # MCP server on /mcp, bearer-protected (upstream refuses a non-loopback bind
+  # without a token). Reads the graph + source under /repos.
+  code-graph-rag:
+    profiles: ["code-graph-rag"]
+    build: *build
+    image: code-graph-rag:${CGR_VERSION:-0.3.13}
+    restart: unless-stopped
+    ports:
+      - "4350:8080"
+    environment:
+      <<: *env
+      MCP_HTTP_HOST: 0.0.0.0
+      MCP_HTTP_PORT: "8080"
+      MCP_HTTP_AUTH_TOKEN: ${CGR_MCP_TOKEN:-lab-cgr}
+      TARGET_REPO_PATH: /repos/${CGR_REPO:-zustand}
+    working_dir: /repos/${CGR_REPO:-zustand}
+    volumes:
+      - ../../.docker/repos:/repos:ro
+      - ../../.docker/code-graph-rag:/data
+    command: ["cgr", "mcp-server", "--transport", "http"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket;socket.create_connection(('127.0.0.1',8080),timeout=5).close()"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 20s
+
+  # One-shot indexer (benchmark times this): tree-sitter parse -> SQLite graph.
+  code-graph-rag-index:
+    profiles: ["code-graph-rag"]
+    build: *build
+    image: code-graph-rag:${CGR_VERSION:-0.3.13}
+    environment: *env
+    volumes:
+      - ../../.docker/repos:/repos:ro
+      - ../../.docker/code-graph-rag:/data
+    entrypoint: ["cgr"]
+    command: ["--help"]
+
+  # Auto-update: git-sync POSTs {"repo",...} here; for CGR_REPO it re-runs the
+  # incremental `cgr start --update-graph` (hash cache, only changed files).
+  # Add http://code-graph-rag-hook:8080/ to SYNC_NOTIFY_URLS. Internal only.
+  # (`cgr watch` is not used: inotify does not fire through the host bind mount.)
+  code-graph-rag-hook:
+    profiles: ["code-graph-rag"]
+    build: *build
+    image: code-graph-rag:${CGR_VERSION:-0.3.13}
+    restart: unless-stopped
+    environment:
+      <<: *env
+      CGR_REPO: ${CGR_REPO:-zustand}
+    volumes:
+      - ../../.docker/repos:/repos:ro
+      - ../../.docker/code-graph-rag:/data
+      - ./hook.py:/hook.py:ro
+    entrypoint: ["python", "/hook.py"]

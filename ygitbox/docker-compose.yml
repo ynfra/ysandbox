@@ -1,0 +1,63 @@
+# ygitbox POC: Forgejo (Git server + stand-in SSO) and ygitbox (MCP server).
+# Run `make up` the first time: it boots Forgejo, seeds users/repos/tokens via
+# scripts/bootstrap.sh, writes .docker/ygitbox.env, then starts ygitbox.
+services:
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:13.0.5
+    restart: unless-stopped
+    environment:
+      USER_UID: "1000"
+      USER_GID: "1000"
+      FORGEJO__database__DB_TYPE: sqlite3
+      FORGEJO__security__INSTALL_LOCK: "true"
+      FORGEJO__security__PASSWORD_COMPLEXITY: "off"
+      FORGEJO__security__MIN_PASSWORD_LENGTH: "6"
+      FORGEJO__server__ROOT_URL: http://localhost:3300/
+      FORGEJO__server__HTTP_PORT: "3000"
+      FORGEJO__server__DISABLE_SSH: "true"
+      FORGEJO__service__DISABLE_REGISTRATION: "true"
+      FORGEJO__service__DEFAULT_KEEP_EMAIL_PRIVATE: "false"
+      FORGEJO__repository__DEFAULT_BRANCH: main
+      FORGEJO__oauth2__ENABLED: "true"
+      FORGEJO__log__LEVEL: Warn
+    ports:
+      - "3300:3000"
+    volumes:
+      - ./.docker/forgejo:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  ygitbox:
+    build: ./app
+    image: ygitbox:poc
+    restart: unless-stopped
+    depends_on:
+      forgejo:
+        condition: service_healthy
+    env_file:
+      - path: ./.docker/ygitbox.env   # written by scripts/bootstrap.sh
+        required: false
+    environment:
+      YGITBOX_PUBLIC_URL: http://localhost:8790
+      YGITBOX_DATA_DIR: /data
+      YGITBOX_REPOS_FILE: /config/repos.yaml
+      YGITBOX_BOT_NAME: ygitbox-bot
+      YGITBOX_BOT_EMAIL: ygitbox@example.com
+      YGITBOX_SERVICE_USER: ygitbox-bot
+      # Browser goes to the public Forgejo URL; server-to-server calls use the compose network.
+      YGITBOX_OIDC_AUTHORIZE_URL: http://localhost:3300/login/oauth/authorize
+      YGITBOX_OIDC_TOKEN_URL: http://forgejo:3000/login/oauth/access_token
+      YGITBOX_OIDC_USERINFO_URL: http://forgejo:3000/login/oauth/userinfo
+    ports:
+      - "8790:8790"
+    volumes:
+      - ./.docker/ygitbox:/data
+      - ./repos.yaml:/config/repos.yaml:ro
+    healthcheck:
+      test: ["CMD", "bun", "-e", "const r = await fetch('http://localhost:8790/healthz'); process.exit(r.ok ? 0 : 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12

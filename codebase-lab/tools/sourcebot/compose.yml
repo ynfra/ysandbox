@@ -1,0 +1,74 @@
+# Sourcebot v5.1.16 (Zoekt code search + Ask). v6 needs an emailed activation
+# code, so the lab pins the last v5 (free plan, anonymous access). See README.
+services:
+  sourcebot:
+    image: ghcr.io/sourcebot-dev/sourcebot:v5.1.16
+    profiles: ["sourcebot"]
+    restart: unless-stopped
+    environment:
+      CONFIG_PATH: /data/config.json
+      AUTH_URL: http://localhost:4330
+      AUTH_SECRET: lab-only-auth-secret-0000000000000000000
+      SOURCEBOT_ENCRYPTION_KEY: lab-only-encryption-key-00000000
+      DATABASE_URL: postgresql://postgres:postgres@sourcebot-postgres:5432/postgres
+      REDIS_URL: redis://sourcebot-redis:6379
+      LAB_KEY: ${LAB_KEY:-sk-codebase-lab}
+      SOURCEBOT_TELEMETRY_DISABLED: "true"
+      FORCE_ENABLE_ANONYMOUS_ACCESS: "true"
+    volumes:
+      - ./config.json:/data/config.json:ro
+      - ../../.docker/sourcebot/data:/data/.sourcebot
+    depends_on:
+      sourcebot-postgres:
+        condition: service_healthy
+      sourcebot-redis:
+        condition: service_healthy
+
+  # v5.1.x gates the built-in /api/mcp behind a paid plan, so the free MCP
+  # server is the standalone stdio package @sourcebot/mcp wrapped by supergateway.
+  sourcebot-mcp:
+    image: node:22.11-alpine
+    profiles: ["sourcebot"]
+    restart: unless-stopped
+    environment:
+      SOURCEBOT_HOST: http://sourcebot:3000
+    command: ["npx", "-y", "supergateway@4.2.1", "--stdio", "npx -y @sourcebot/mcp@1.0.18", "--outputTransport", "streamableHttp", "--port", "8000", "--streamableHttpPath", "/mcp"]
+    depends_on:
+      - sourcebot
+
+  # One public port: /mcp -> sourcebot-mcp, everything else -> Sourcebot web.
+  sourcebot-proxy:
+    image: nginx:1.27-alpine
+    profiles: ["sourcebot"]
+    restart: unless-stopped
+    ports:
+      - "4330:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - sourcebot
+      - sourcebot-mcp
+
+  sourcebot-postgres:
+    image: postgres:16.4
+    profiles: ["sourcebot"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ../../.docker/sourcebot/pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  sourcebot-redis:
+    image: redis:7.4.1-alpine
+    profiles: ["sourcebot"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20

@@ -1,0 +1,215 @@
+{
+  "tool": "sourcebot",
+  "repo": "react",
+  "kind": "retrieval",
+  "at": "2026-11-02T07:21:55.777Z",
+  "summary": {
+    "hit_rate": 0.25,
+    "recall": 0.2,
+    "p50_ms": 573,
+    "avg_tokens": 3038,
+    "errors": 0
+  },
+  "rows": [
+    {
+      "id": "L1",
+      "category": "lookup",
+      "ms": 2930,
+      "chars": 40452,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/compiler%2Fpackages%2Fbabel-plugin-react-compiler%2Fsrc%2F__tests__%2Ffixtures%2Fcompiler%2Fglobals-dont-resolve-local-useState.js\nnum_matches: 5\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-debug-tools%2Fsrc%2F__tes"
+    },
+    {
+      "id": "L2",
+      "category": "lookup",
+      "ms": 573,
+      "chars": 40147,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Fuse-sync-external-store%2Fsrc%2F__tests__%2FuseSyncExternalStoreShared-test.js\nnum_matches: 20\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact%2Fsrc%2F__tests__%2FtestDefinitions%2FReactDOMClient.d.ts\nnum_mat"
+    },
+    {
+      "id": "L3",
+      "category": "lookup",
+      "ms": 429,
+      "chars": 580,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact%2Fsrc%2Fjsx%2FReactJSXElement.js\nnum_matches: 3\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact%2Fsrc%2Fjsx%2FReactJSX.js\nnum_matches: 7\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://lo"
+    },
+    {
+      "id": "L4",
+      "category": "lookup",
+      "ms": 502,
+      "chars": 3283,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberLane.js\nnum_matches: 26\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Fshared%2FReactFeatureFlags.js\nnum_matches: 1\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http:/"
+    },
+    {
+      "id": "L5",
+      "category": "lookup",
+      "ms": 530,
+      "chars": 3908,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Fscheduler%2Fnpm%2Fumd%2Fscheduler.development.js\nnum_matches: 4\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Fscheduler%2Fnpm%2Fumd%2Fscheduler.profiling.min.js\nnum_matches: 4\nrepo: forgejo:3000/lab/react\nlanguag"
+    },
+    {
+      "id": "C1",
+      "category": "callgraph",
+      "ms": 553,
+      "chars": 1235,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberHooks.js\nnum_matches: 6\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberWorkLoop.js\nnum_matches: 4\nrepo: forgejo:3000/lab/react\nlanguage: JavaSc"
+    },
+    {
+      "id": "C2",
+      "category": "callgraph",
+      "ms": 1030,
+      "chars": 1022,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberHooks.js\nnum_matches: 9\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberHooks.js\nnum_matches: 8\nrepo: forgejo:3000/lab/react\nlanguage: JavaScrip"
+    },
+    {
+      "id": "C3",
+      "category": "callgraph",
+      "ms": 1591,
+      "chars": 8395,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/fixtures%2Ffiber-debugger%2Fsrc%2FApp.js\nnum_matches: 1\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberHooks.js\nnum_matches: 1\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http:/"
+    },
+    {
+      "id": "C4",
+      "category": "callgraph",
+      "ms": 1043,
+      "chars": 616,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberCommitWork.js\nnum_matches: 4\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberWorkLoop.js\nnum_matches: 2\nrepo: forgejo:3000/lab/react\nlanguage: J"
+    },
+    {
+      "id": "C5",
+      "category": "callgraph",
+      "ms": 510,
+      "chars": 604,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-server%2Fsrc%2FReactFizzServer.js\nnum_matches: 3\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberHooks.js\nnum_matches: 11\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nf"
+    },
+    {
+      "id": "A1",
+      "category": "architecture",
+      "ms": 573,
+      "chars": 613,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberLane.js\nnum_matches: 3\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberWorkLoop.js\nnum_matches: 2\nrepo: forgejo:3000/lab/react\nlanguage: JavaScr"
+    },
+    {
+      "id": "A2",
+      "category": "architecture",
+      "ms": 1631,
+      "chars": 41125,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberThrow.js\nnum_matches: 4\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberWorkLoop.js\nnum_matches: 3\nrepo: forgejo:3000/lab/react\nlanguage: JavaSc"
+    },
+    {
+      "id": "A3",
+      "category": "architecture",
+      "ms": 418,
+      "chars": 835,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-dom-bindings%2Fsrc%2Fevents%2FDOMPluginEventSystem.js\nnum_matches: 1\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-dom%2Fsrc%2Fclient%2FReactDOMRoot.js\nnum_matches: 3\nrepo: forgejo:3000/lab/react\nlang"
+    },
+    {
+      "id": "A4",
+      "category": "architecture",
+      "ms": 1001,
+      "chars": 44774,
+      "recall": 0.5,
+      "hit": true,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Fscheduler%2Fsrc%2Fforks%2FSchedulerPostTask.js\nnum_matches: 15\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Finternal-test-utils%2F__tests__%2FReactInternalTestUtils-test.js\nnum_matches: 24\nrepo: forgejo:3000/lab"
+    },
+    {
+      "id": "A5",
+      "category": "architecture",
+      "ms": 1058,
+      "chars": 607,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactChildFiber.js\nnum_matches: 8\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberBeginWork.js\nnum_matches: 8\nrepo: forgejo:3000/lab/react\nlanguage: JavaS"
+    },
+    {
+      "id": "I1",
+      "category": "impact",
+      "ms": 532,
+      "chars": 821,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberHooks.js\nnum_matches: 8\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberWorkLoop.js\nnum_matches: 2\nrepo: forgejo:3000/lab/react\nlanguage: JavaSc"
+    },
+    {
+      "id": "I2",
+      "category": "impact",
+      "ms": 457,
+      "chars": 58,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"from 'scheduler' import\"\n"
+    },
+    {
+      "id": "I3",
+      "category": "impact",
+      "ms": 435,
+      "chars": 401,
+      "recall": 0.5,
+      "hit": true,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiber.js\nnum_matches: 2\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberBeginWork.js\nnum_matches: 3\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript"
+    },
+    {
+      "id": "I4",
+      "category": "impact",
+      "ms": 820,
+      "chars": 41895,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2FReactFiberRootScheduler.js\nnum_matches: 4\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-reconciler%2Fsrc%2F__tests__%2FuseRef-test.internal.js\nnum_matches: 1\nrepo: forgejo:3000/lab/"
+    },
+    {
+      "id": "I5",
+      "category": "impact",
+      "ms": 810,
+      "chars": 11681,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "file: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-dom%2Fsrc%2F__tests__%2FReactDOMSingletonComponents-test.js\nnum_matches: 11\nrepo: forgejo:3000/lab/react\nlanguage: JavaScript\nfile: http://localhost:4330/browse/forgejo:3000/lab/react@refs/heads/main/-/blob/packages%2Freact-dom%2Fsrc%2F__tests__%2FReactDOMFizzShellHydration-test.js\nnum_matches: 12\nrep"
+    }
+  ]
+}

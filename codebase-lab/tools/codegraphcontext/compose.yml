@@ -1,0 +1,82 @@
+# CodeGraphContext: code graph in FalkorDB (server), CLI `cgc`, MCP via
+# supergateway (cgc mcp start is stdio-only). No LLM needed.
+# Upstream has no usable Docker Hub image, so ./Dockerfile pins the PyPI release.
+# index, watch and mcp are separate processes, so they share a FalkorDB
+# server instead of an embedded DB (embedded allows one process at a time).
+x-cgc-env: &cgc-env
+  DEFAULT_DATABASE: falkordb-remote
+  DATABASE_TYPE: falkordb-remote
+  FALKORDB_HOST: codegraphcontext-db
+  FALKORDB_PORT: "6379"
+  CGC_WATCH_POLLING: "1"
+
+x-cgc-build: &cgc-build
+  build:
+    context: .
+  image: codebase-lab/codegraphcontext:0.6.13-sg4.2.1
+
+services:
+  codegraphcontext-db:
+    image: falkordb/falkordb:v4.14.10
+    profiles: ["codegraphcontext"]
+    restart: unless-stopped
+    environment:
+      REDIS_ARGS: "--appendonly yes --save 60 1000 --dir /var/lib/falkordb/data"
+    volumes:
+      - ../../.docker/codegraphcontext/db:/var/lib/falkordb/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # MCP over Streamable HTTP on :4360/mcp
+  codegraphcontext:
+    <<: *cgc-build
+    profiles: ["codegraphcontext"]
+    restart: unless-stopped
+    ports:
+      - "4360:8000"
+    environment: *cgc-env
+    volumes:
+      - ../../.docker/repos:/repos:ro
+      - ../../.docker/codegraphcontext/home:/data
+    command: ["supergateway", "--stdio", "cgc mcp start", "--outputTransport", "streamableHttp", "--port", "8000", "--streamableHttpPath", "/mcp"]
+    depends_on:
+      codegraphcontext-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null http://localhost:8000/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  # One-shot: docker compose --profile codegraphcontext run --rm codegraphcontext-index /repos/zustand
+  codegraphcontext-index:
+    <<: *cgc-build
+    profiles: ["codegraphcontext"]
+    environment: *cgc-env
+    volumes:
+      - ../../.docker/repos:/repos:ro
+      - ../../.docker/codegraphcontext/home:/data
+    entrypoint: ["cgc", "index", "--no-progress"]
+    depends_on:
+      codegraphcontext-db:
+        condition: service_healthy
+
+  # Auto-update: file watcher (polling, bind mounts do not deliver inotify
+  # events reliably) on already indexed repos. Space-separated WATCH_REPOS.
+  codegraphcontext-watch:
+    <<: *cgc-build
+    profiles: ["codegraphcontext"]
+    restart: unless-stopped
+    environment:
+      <<: *cgc-env
+      WATCH_REPOS: ${CGC_WATCH_REPOS:-zustand}
+    volumes:
+      - ../../.docker/repos:/repos:ro
+      - ../../.docker/codegraphcontext/home:/data
+    entrypoint: ["sh", "-c", "for r in $$WATCH_REPOS; do cgc watch --poll /repos/$$r & done; wait"]
+    depends_on:
+      codegraphcontext-db:
+        condition: service_healthy

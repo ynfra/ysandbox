@@ -1,0 +1,11 @@
+{
+  "tool": "sourcebot",
+  "repo": "react",
+  "kind": "index",
+  "at": "2026-11-02T07:56:21.384Z",
+  "ok": true,
+  "seconds": 1192,
+  "peak_mib": 1334,
+  "disk_mib": 146,
+  "error": null
+}

@@ -51,12 +51,14 @@ under `.docker/` (gitignored).
 | [mcpo](./mcpo) | MCP gateways & bridges | Expose MCP tools as OpenAPI/REST (by Open WebUI) |
 | [metamcp](./metamcp) | MCP gateways & bridges | MCP proxy/aggregator with middleware and namespaces |
 | [promptregistry-mcp](./promptregistry-mcp) | MCP gateways & bridges | Simple MCP prompt registry (via supergateway) |
+| [ygitbox](./ygitbox) | MCP gateways & bridges | ygitbox POC — MCP server for editing Git repos without Git accounts (SSO/token, policy, PR approvals) + Forgejo |
 | [supergateway](./supergateway) | MCP gateways & bridges | Transport bridge — stdio MCP to SSE/WebSocket/HTTP |
 | [chroma](./chroma) | Vector databases & search | Chroma AI-native vector/embedding database for LLM apps |
 | [meilisearch](./meilisearch) | Vector databases & search | Lightning-fast, typo-tolerant search engine with REST API |
 | [openserp](./openserp) | Vector databases & search | Search engine results API (Google, Bing, Yandex, Baidu, DuckDuckGo) |
 | [qdrant](./qdrant) | Vector databases & search | Qdrant high-performance vector database for AI applications |
 | [searxng](./searxng) | Vector databases & search | SearXNG self-hosted meta-search engine with JSON API |
+| [codebase-lab](./codebase-lab) | Vector databases & search | Code-indexing bench: 7 OSS code graph/search/wiki tools over Forgejo + git-sync auto-pull, local models via LiteLLM/Ollama, MCP, grep-baseline benchmark |
 | [weaviate](./weaviate) | Vector databases & search | Weaviate vector database with hybrid vector + BM25 search |
 | [changedetection](./changedetection) | Web crawling & scraping | ChangeDetection.io website change monitoring and notifications |
 | [crawl4ai](./crawl4ai) | Web crawling & scraping | AI-powered web crawler with structured data extraction |
@@ -89,6 +91,7 @@ under `.docker/` (gitignored).
 | [openobserve](./openobserve) | Monitoring & observability | OpenObserve observability platform for logs, metrics, and traces |
 | [uptime-kuma](./uptime-kuma) | Monitoring & observability | Self-hosted uptime monitoring with status pages and notifications |
 | [metabase-multi](./metabase-multi) | Data & storage | Dual Metabase instances with separate PostgreSQL databases |
+| [celld-apps](./celld-apps) | Data & storage | Durable-Objects-style app hosting: MCP connector, app per subdomain, SQLite per app, on celld + RustFS |
 | [minio](./minio) | Data & storage | MinIO S3-compatible object storage with web console |
 | [supabase](./supabase) | Data & storage | Self-hosted Supabase backend platform (PostgreSQL, Auth, Storage, Realtime) |
 | [terraform-r2](./terraform-r2) | Data & storage | Terraform configuration for Cloudflare R2 storage (no Docker) |

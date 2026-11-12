@@ -1,0 +1,25 @@
+{
+  "tool": "codewiki",
+  "profile": "codewiki",
+  "llm_at_index": true,
+  "serve": "CODEWIKI_REPO={repo} docker compose --profile codewiki up -d --wait --force-recreate codewiki",
+  "index": {
+    "mode": "oneshot",
+    "cmd": "docker compose --profile codewiki run --rm codewiki-index /gen.sh {repo}",
+    "ready": null,
+    "timeout_s": 7200
+  },
+  "mcp": {
+    "url": "http://localhost:4380/mcp",
+    "headers": {}
+  },
+  "search": null,
+  "containers": [
+    "codebase-lab-codewiki-1"
+  ],
+  "disk": [
+    ".docker/codewiki"
+  ],
+  "stop": "docker compose stop codewiki codewiki-hook",
+  "search_note": "CodeWiki's MCP is IDE-driven (analyze/write docs); it has no search or question tool. Evaluate its generated docs instead."
+}

@@ -1,0 +1,38 @@
+# Which repos ygitbox fronts and who may do what. Content rules (direct vs
+# propose, approvals) live in each repo's .ygitbox/policy.yaml.
+# Roles: viewer < contributor < maintainer < admin. "*" = any signed-in user.
+admins:
+  - admin@example.com
+
+repos:
+  - id: skills
+    description: Agent skills shared across teams (SKILL.md folders)
+    provider: forgejo
+    api_url: http://forgejo:3000/api/v1
+    clone_url: http://forgejo:3000/team/skills.git
+    web_url: http://localhost:3300/team/skills
+    owner: team
+    name: skills
+    default_branch: main
+    packs: [skills]
+    skills_root: skills
+    roles:
+      contributor: ["*"]
+      maintainer: [jordan@example.com]
+    # Native PR reviews in the forge count only for logins mapped here: forge emails are not verified.
+    native_reviewers:
+      jordan: jordan@example.com
+
+  - id: handbook
+    description: Team handbook and runbooks (Markdown)
+    provider: forgejo
+    api_url: http://forgejo:3000/api/v1
+    clone_url: http://forgejo:3000/team/handbook.git
+    web_url: http://localhost:3300/team/handbook
+    owner: team
+    name: handbook
+    default_branch: main
+    roles:
+      viewer: ["*"]
+      contributor: [alex@example.com]
+      maintainer: [jordan@example.com]

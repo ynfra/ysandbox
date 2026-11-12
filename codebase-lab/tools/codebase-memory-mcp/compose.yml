@@ -1,0 +1,24 @@
+services:
+  codebase-memory-mcp:
+    build: .
+    image: codebase-lab/codebase-memory-mcp:local
+    profiles: ["codebase-memory-mcp"]
+    restart: unless-stopped
+    ports:
+      - "4340:4340"
+    environment:
+      CBM_CACHE_DIR: /data
+    volumes:
+      - ../../.docker/codebase-memory-mcp:/data
+      - ../../.docker/repos:/repos:ro
+
+  # One-shot: docker compose --profile codebase-memory-mcp run --rm codebase-memory-mcp-index /repos/<name>
+  codebase-memory-mcp-index:
+    image: codebase-lab/codebase-memory-mcp:local
+    profiles: ["codebase-memory-mcp"]
+    environment:
+      CBM_CACHE_DIR: /data
+    volumes:
+      - ../../.docker/codebase-memory-mcp:/data
+      - ../../.docker/repos:/repos:ro
+    entrypoint: ["index.sh"]

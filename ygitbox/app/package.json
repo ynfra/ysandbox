@@ -1,0 +1,24 @@
+{
+  "name": "ygitbox",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP server that lets people change Git repos without Git accounts: identity, policy, changes and approvals over a service user",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/server.ts",
+    "dev": "bun --watch run src/server.ts",
+    "typecheck": "bunx tsc --noEmit",
+    "e2e": "bun run test/e2e.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.19.0",
+    "gray-matter": "^4.0.3",
+    "yaml": "^2.6.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.0",
+    "typescript": "^5.9.0"
+  }
+}

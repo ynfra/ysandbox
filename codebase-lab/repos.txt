@@ -1,0 +1,6 @@
+# name   source                                   ref
+# Pushed into Forgejo (org `lab`) by `make seed`. Pinned refs keep benchmark
+# runs comparable. zustand is the small, fast repo for smoke tests; react is
+# the one that measures anything.
+zustand  https://github.com/pmndrs/zustand.git    v5.0.9
+react    https://github.com/facebook/react.git    v19.3.1

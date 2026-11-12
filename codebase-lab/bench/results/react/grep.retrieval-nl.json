@@ -1,0 +1,215 @@
+{
+  "tool": "grep",
+  "repo": "react",
+  "kind": "retrieval-nl",
+  "at": "2026-11-02T07:55:44.323Z",
+  "summary": {
+    "hit_rate": 0.75,
+    "recall": 0.65,
+    "p50_ms": 155,
+    "avg_tokens": 123,
+    "errors": 0
+  },
+  "rows": [
+    {
+      "id": "L1",
+      "category": "lookup",
+      "ms": 282,
+      "chars": 490,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-reconciler/src/ReactFiberHooks.js\npackages/eslint-plugin-react-hooks/src/rules/ExhaustiveDeps.ts\npackages/react-devtools/CHANGELOG.md\npackages/react-server/src/ReactFizzHooks.js\npackages/react-client/src/ReactFlightClient.js\npackages/react-reconciler/src/ReactFiberLane.js\npackages/react-reconciler/src/ReactChildFiber.js\npackages/react-reconciler/src/ReactFiberThrow.js\npackages/react"
+    },
+    {
+      "id": "L2",
+      "category": "lookup",
+      "ms": 117,
+      "chars": 523,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "packages/react-devtools/CHANGELOG.md\npackages/react-server/src/ReactFlightServer.js\npackages/react-reconciler/src/ReactFiberHooks.js\npackages/react-devtools-shell/src/e2e/devtools.js\npackages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-reconciler/src/ReactInternalTypes.js\npackages/react-server/src/ReactFizzClassComponent.js\npackages/react-devtools-shared/src/backend/fiber/renderer.js"
+    },
+    {
+      "id": "L3",
+      "category": "lookup",
+      "ms": 138,
+      "chars": 457,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-client/src/ReactFlightClient.js\npackages/react-server/src/ReactFlightServer.js\npackages/react-devtools/CHANGELOG.md\npackages/react/src/jsx/ReactJSXElement.js\npackages/react-server/src/ReactFizzServer.js\npackages/react-reconciler/src/ReactFiberHooks.js\npackages/react-devtools-extensions/src/main/index.js\npackages/react-devtools-facade/src/DevToolsFacadeTreeTools.js\npackages/shared/Re"
+    },
+    {
+      "id": "L4",
+      "category": "lookup",
+      "ms": 143,
+      "chars": 538,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "packages/react-reconciler/src/ReactFiberHooks.js\npackages/react-reconciler/src/ReactFiberThrow.js\npackages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-reconciler/src/ReactFiberCommitWork.js\npackages/react-reconciler/src/ReactFiberNewContext.js\npackages/react-reconciler/src/ReactFiberReconciler.js\npackages/react-reconciler/src/ReactFiberCompleteWork.js\npackages/react-reconciler/src/Re"
+    },
+    {
+      "id": "L5",
+      "category": "lookup",
+      "ms": 162,
+      "chars": 483,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-devtools-shared/src/bridge.js\npackages/react-reconciler/src/ReactFiberHooks.js\npackages/scheduler/src/forks/SchedulerPostTask.js\npackages/react-noop-renderer/src/createReactNoop.js\npackages/react-reconciler/src/ReactInternalTypes.js\npackages/react-dom-bindings/src/client/ReactFiberConfigDOM.js\npackages/react-devtools/CHANGELOG.md\np"
+    },
+    {
+      "id": "C1",
+      "category": "callgraph",
+      "ms": 165,
+      "chars": 533,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-reconciler/src/ReactFiberBeginWork.js\npackages/react-client/src/ReactFlightClient.js\npackages/react-reconciler/src/ReactFiberHooks.js\npackages/react-reconciler/src/ReactFiberReconciler.js\npackages/react-reconciler/src/ReactFiberClassComponent.js\npackages/react-devtools-shared/src/backend/fiber/renderer.js\npackages/react-devtools-sh"
+    },
+    {
+      "id": "C2",
+      "category": "callgraph",
+      "ms": 165,
+      "chars": 480,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-server/src/ReactFizzServer.js\npackages/react-reconciler/src/ReactFiberHooks.js\npackages/react-devtools/CHANGELOG.md\npackages/react-reconciler/src/ReactFiberLane.js\npackages/react-reconciler/src/ReactFiberThrow.js\npackages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-reconciler/src/ReactFiberBeginWork.js\npackages/react-dom-bindings/src/server/ReactFizzConfigDOM.js\npackag"
+    },
+    {
+      "id": "C3",
+      "category": "callgraph",
+      "ms": 155,
+      "chars": 570,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-reconciler/src/ReactFiberBeginWork.js\npackages/react-server/src/ReactFlightServer.js\npackages/react-reconciler/src/ReactFiberCommitWork.js\npackages/react-reconciler/src/ReactFiberCompleteWork.js\npackages/react-reconciler/src/ReactFiberHydrationContext.js\npackages/react-devtools-shared/src/backend/fiber/renderer.js\npackages/react-do"
+    },
+    {
+      "id": "C4",
+      "category": "callgraph",
+      "ms": 286,
+      "chars": 568,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-reconciler/src/ReactFiberCommitWork.js\npackages/react-reconciler/src/ReactFiberHooks.js\npackages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-reconciler/src/ReactFiberBeginWork.js\npackages/react-devtools-shared/src/backend/fiber/renderer.js\npackages/react-dom-bindings/src/server/ReactFizzConfigDOM.js\npackages/react-dom-bindings/src/client/ReactFiberConfigDOM.js\npackages"
+    },
+    {
+      "id": "C5",
+      "category": "callgraph",
+      "ms": 112,
+      "chars": 474,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-devtools/CHANGELOG.md\npackages/react-server/src/ReactFizzServer.js\npackages/react-devtools-cdt-mcp/README.md\npackages/react-server/src/ReactFizzHooks.js\npackages/react-server/src/ReactFlightServer.js\npackages/react-reconciler/src/ReactFiberHooks.js\npackages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-reconciler/src/ReactInternalTypes.js\npackages/react-reconciler/src/Re"
+    },
+    {
+      "id": "A1",
+      "category": "architecture",
+      "ms": 136,
+      "chars": 496,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "packages/shared/ReactFeatureFlags.js\npackages/react-reconciler/src/ReactFiberLane.js\npackages/react-reconciler/src/ReactChildFiber.js\npackages/react-reconciler/src/ReactFiberHooks.js\npackages/react-reconciler/src/ReactFiberThrow.js\npackages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-reconciler/src/ReactInternalTypes.js\npackages/react-reconciler/src/ReactFiberBeginWork.js\npackages/re"
+    },
+    {
+      "id": "A2",
+      "category": "architecture",
+      "ms": 132,
+      "chars": 472,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "packages/react-server/src/ReactFizzServer.js\npackages/react-reconciler/src/ReactFiberThenable.js\npackages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-devtools-shared/src/backend/fiber/renderer.js\npackages/internal-test-utils/internalAct.js\npackages/react-server/src/ReactFizzThenable.js\npackages/react-server/src/ReactFlightThenable.js\npackages/react-dom-bindings/src/client/ReactFiberC"
+    },
+    {
+      "id": "A3",
+      "category": "architecture",
+      "ms": 114,
+      "chars": 516,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "packages/react-devtools-shared/src/hook.js\npackages/react-server/src/ReactFizzServer.js\npackages/react-server/src/ReactFlightServer.js\npackages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-reconciler/src/ReactFiberCommitWork.js\npackages/react-reconciler/src/ReactFiberCompleteWork.js\npackages/react-dom-bindings/src/client/ReactDOMComponent.js\npackages/react-dom-bindings/src/client/Reac"
+    },
+    {
+      "id": "A4",
+      "category": "architecture",
+      "ms": 112,
+      "chars": 464,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "packages/react-reconciler/src/ReactFiberLane.js\npackages/react-reconciler/src/ReactFiberHooks.js\npackages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-reconciler/README.md\npackages/react-devtools/CHANGELOG.md\npackages/react-art/src/ReactFiberConfigART.js\npackages/react-noop-renderer/src/ReactNoop.js\npackages/react-reconciler/src/ReactChildFiber.js\npackages/react-debug-tools/src/ReactD"
+    },
+    {
+      "id": "A5",
+      "category": "architecture",
+      "ms": 113,
+      "chars": 475,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-reconciler/README.md\npackages/react-reconciler/src/ReactFiber.js\npackages/react-client/src/ReactFlightClient.js\npackages/react-reconciler/src/ReactFiberLane.js\npackages/react-reconciler/src/ReactChildFiber.js\npackages/react-reconciler/src/ReactFiberHooks.js\npackages/react-reconciler/src/ReactFiberThrow.js\npackages/react-debug-tools/src/ReactDebugHooks.js\npackages/react-noop-renderer"
+    },
+    {
+      "id": "I1",
+      "category": "impact",
+      "ms": 149,
+      "chars": 423,
+      "recall": 0.5,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-reconciler/src/ReactFiberHooks.js\npackages/react-server/README.md\npackages/react-reconciler/README.md\npackages/use-subscription/README.md\npackages/react-devtools/CHANGELOG.md\npackages/react-devtools-core/README.md\npackages/react-client/src/ReactFlightClient.js\npackages/react-refresh/src/ReactFreshRuntime.js\npackages/react-reconcile"
+    },
+    {
+      "id": "I2",
+      "category": "impact",
+      "ms": 169,
+      "chars": 454,
+      "recall": 0.5,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-devtools-shared/src/utils.js\npackages/react-server/src/ReactFlightServer.js\npackages/react-debug-tools/src/ReactDebugHooks.js\npackages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-devtools-shared/src/hooks/astUtils.js\npackages/react-devtools-shared/src/backend/fiber/renderer.js\npackages/react-devtools/OVERVIEW.md\npackages/react-reconciler/README.md\npackages/react-devtoo"
+    },
+    {
+      "id": "I3",
+      "category": "impact",
+      "ms": 186,
+      "chars": 465,
+      "recall": 0.5,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-devtools/CHANGELOG.md\npackages/react-reconciler/src/ReactFiberBeginWork.js\npackages/react-client/src/ReactFlightClient.js\npackages/react-reconciler/src/ReactFiberHooks.js\npackages/react-client/src/ReactFlightReplyClient.js\npackages/react/src/jsx/ReactJSXElement.js\npackages/react-server/src/ReactFizzHooks.js\npackages/react-server/src/ReactFizzServer.js\npackages/react-server/src/React"
+    },
+    {
+      "id": "I4",
+      "category": "impact",
+      "ms": 174,
+      "chars": 451,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-devtools/CHANGELOG.md\npackages/react-server/src/ReactFizzServer.js\npackages/react-server/src/ReactFlightServer.js\npackages/react-reconciler/src/ReactFiberHooks.js\npackages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-devtools-shared/src/backend/fiber/renderer.js\npackages/react/src/ReactTaint.js\npackages/shared/ReactFeatureFlags.js\npackages/react-reconciler/src/ReactFibe"
+    },
+    {
+      "id": "I5",
+      "category": "impact",
+      "ms": 253,
+      "chars": 499,
+      "recall": 0.5,
+      "hit": true,
+      "error": null,
+      "sample": "packages/react-server/src/ReactFizzServer.js\npackages/react-reconciler/src/ReactFiberWorkLoop.js\npackages/react-devtools-shared/src/backend/fiber/renderer.js\npackages/react-server/src/ReactFlightServer.js\npackages/react-reconciler/src/ReactFiberBeginWork.js\npackages/react-reconciler/src/ReactFiberHydrationContext.js\npackages/react-dom-bindings/src/client/ReactFiberConfigDOM.js\npackages/react-devto"
+    }
+  ]
+}

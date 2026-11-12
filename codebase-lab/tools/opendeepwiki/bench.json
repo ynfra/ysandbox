@@ -1,0 +1,17 @@
+{
+  "tool": "opendeepwiki",
+  "profile": "opendeepwiki",
+  "llm_at_index": true,
+  "serve": "docker compose --profile opendeepwiki up -d --wait opendeepwiki opendeepwiki-web",
+  "index": {
+    "mode": "server",
+    "cmd": "tools/opendeepwiki/odw.sh add {repo}",
+    "ready": "tools/opendeepwiki/odw.sh ready {repo}",
+    "timeout_s": 7200
+  },
+  "mcp": { "url": "http://localhost:4370/api/mcp/lab/{repo}", "headers": {}, "note": "repo-scoped endpoint; the unscoped /api/mcp has no search_doc" },
+  "search": { "tool": "search_doc", "args": { "query": "{query}", "maxResults": 10 } },
+  "containers": ["codebase-lab-opendeepwiki-1", "codebase-lab-opendeepwiki-web-1"],
+  "disk": [".docker/opendeepwiki"],
+  "stop": "docker compose stop opendeepwiki opendeepwiki-web"
+}

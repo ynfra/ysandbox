@@ -1,0 +1,11 @@
+{
+  "tool": "code-graph-rag",
+  "repo": "react",
+  "kind": "index",
+  "at": "2026-11-02T07:59:58.299Z",
+  "ok": true,
+  "seconds": 123,
+  "peak_mib": 2483,
+  "disk_mib": 166,
+  "error": null
+}

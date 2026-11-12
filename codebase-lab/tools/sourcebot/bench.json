@@ -1,0 +1,23 @@
+{
+  "tool": "sourcebot",
+  "profile": "sourcebot",
+  "llm_at_index": false,
+  "serve": "docker compose --profile sourcebot up -d sourcebot sourcebot-postgres sourcebot-redis sourcebot-mcp sourcebot-proxy",
+  "index": {
+    "mode": "server",
+    "cmd": null,
+    "ready": "curl -fsS http://localhost:4330/api/repos | python3 -c \"import sys,json; r=[x for x in json.load(sys.stdin) if x['repoName'].endswith('/lab/{repo}')]; sys.exit(0 if r and r[0].get('indexedAt') else 1)\"",
+    "timeout_s": 7200
+  },
+  "mcp": { "url": "http://localhost:4330/mcp", "headers": {} },
+  "search": { "tool": "search_code", "args": { "query": "{query}" } },
+  "containers": [
+    "codebase-lab-sourcebot-1",
+    "codebase-lab-sourcebot-mcp-1",
+    "codebase-lab-sourcebot-proxy-1",
+    "codebase-lab-sourcebot-postgres-1",
+    "codebase-lab-sourcebot-redis-1"
+  ],
+  "disk": [".docker/sourcebot"],
+  "stop": "docker compose stop sourcebot sourcebot-mcp sourcebot-proxy sourcebot-postgres sourcebot-redis"
+}

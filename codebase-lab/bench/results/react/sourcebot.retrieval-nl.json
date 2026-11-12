@@ -1,0 +1,215 @@
+{
+  "tool": "sourcebot",
+  "repo": "react",
+  "kind": "retrieval-nl",
+  "at": "2026-11-02T07:56:52.037Z",
+  "summary": {
+    "hit_rate": 0,
+    "recall": 0,
+    "p50_ms": 527,
+    "avg_tokens": 27,
+    "errors": 0
+  },
+  "rows": [
+    {
+      "id": "L1",
+      "category": "lookup",
+      "ms": 613,
+      "chars": 146,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"Where is useState implemented for the first render, and which function updates state when the setter is called?\"\n"
+    },
+    {
+      "id": "L2",
+      "category": "lookup",
+      "ms": 463,
+      "chars": 93,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"Which file defines the public createRoot API of react-dom?\"\n"
+    },
+    {
+      "id": "L3",
+      "category": "lookup",
+      "ms": 529,
+      "chars": 102,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"Where is the production JSX runtime function that creates elements?\"\n"
+    },
+    {
+      "id": "L4",
+      "category": "lookup",
+      "ms": 527,
+      "chars": 89,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"Where are the lane constants such as SyncLane defined?\"\n"
+    },
+    {
+      "id": "L5",
+      "category": "lookup",
+      "ms": 541,
+      "chars": 122,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"Where is the Scheduler's scheduleCallback implemented for the default (non-mock) build?\"\n"
+    },
+    {
+      "id": "C1",
+      "category": "callgraph",
+      "ms": 530,
+      "chars": 101,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"Which source files in react-reconciler call scheduleUpdateOnFiber?\"\n"
+    },
+    {
+      "id": "C2",
+      "category": "callgraph",
+      "ms": 515,
+      "chars": 104,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"What does dispatchSetState call to decide the priority of the update?\"\n"
+    },
+    {
+      "id": "C3",
+      "category": "callgraph",
+      "ms": 527,
+      "chars": 100,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"Which function does beginWork call to render a Suspense boundary?\"\n"
+    },
+    {
+      "id": "C4",
+      "category": "callgraph",
+      "ms": 528,
+      "chars": 136,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"Which function runs the mutation phase of a commit, and what per-fiber function does it recurse into?\"\n"
+    },
+    {
+      "id": "C5",
+      "category": "callgraph",
+      "ms": 514,
+      "chars": 114,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"What function renders a function component with hooks, and which file is it in?\"\n"
+    },
+    {
+      "id": "A1",
+      "category": "architecture",
+      "ms": 555,
+      "chars": 86,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"Explain how React picks which lanes to render next.\"\n"
+    },
+    {
+      "id": "A2",
+      "category": "architecture",
+      "ms": 499,
+      "chars": 88,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"How does a thrown promise become a Suspense fallback?\"\n"
+    },
+    {
+      "id": "A3",
+      "category": "architecture",
+      "ms": 520,
+      "chars": 95,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"How does react-dom attach event listeners for the whole app?\"\n"
+    },
+    {
+      "id": "A4",
+      "category": "architecture",
+      "ms": 523,
+      "chars": 89,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"How does the reconciler talk to the Scheduler package?\"\n"
+    },
+    {
+      "id": "A5",
+      "category": "architecture",
+      "ms": 522,
+      "chars": 79,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"How does the child reconciler diff children?\"\n"
+    },
+    {
+      "id": "I1",
+      "category": "impact",
+      "ms": 515,
+      "chars": 110,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"If the signature of requestUpdateLane changes, which files must be updated?\"\n"
+    },
+    {
+      "id": "I2",
+      "category": "impact",
+      "ms": 549,
+      "chars": 104,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"Which packages import the scheduler package directly in their source?\"\n"
+    },
+    {
+      "id": "I3",
+      "category": "impact",
+      "ms": 499,
+      "chars": 131,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"If createFiberFromTypeAndProps is renamed, where is it defined and which files call it directly?\"\n"
+    },
+    {
+      "id": "I4",
+      "category": "impact",
+      "ms": 538,
+      "chars": 110,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"Where is flushPassiveEffects defined, and what kind of effects does it run?\"\n"
+    },
+    {
+      "id": "I5",
+      "category": "impact",
+      "ms": 531,
+      "chars": 163,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "No results found for the query: \"Which file contains hydrateRoot for the default react-dom client build, and which function claims existing DOM during hydration?\"\n"
+    }
+  ]
+}

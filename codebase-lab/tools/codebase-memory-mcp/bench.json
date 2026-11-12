@@ -1,0 +1,17 @@
+{
+  "tool": "codebase-memory-mcp",
+  "profile": "codebase-memory-mcp",
+  "llm_at_index": false,
+  "serve": "docker compose --profile codebase-memory-mcp up -d --build codebase-memory-mcp",
+  "index": {
+    "mode": "oneshot",
+    "cmd": "docker compose --profile codebase-memory-mcp run --rm codebase-memory-mcp-index /repos/{repo}",
+    "ready": null,
+    "timeout_s": 7200
+  },
+  "mcp": { "url": "http://localhost:4340/mcp", "headers": {} },
+  "search": { "tool": "search_graph", "args": { "project": "repos-{repo}", "query": "{query}" } },
+  "containers": ["codebase-lab-codebase-memory-mcp-1"],
+  "disk": [".docker/codebase-memory-mcp"],
+  "stop": "docker compose stop codebase-memory-mcp"
+}

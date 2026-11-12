@@ -1,0 +1,4 @@
+.docker/
+.env
+bench/node_modules/
+bench/results/*.tmp

@@ -1,0 +1,215 @@
+{
+  "tool": "codebase-memory-mcp",
+  "repo": "react",
+  "kind": "retrieval",
+  "at": "2026-11-02T07:57:24.569Z",
+  "summary": {
+    "hit_rate": 0.5,
+    "recall": 0.35416666666666663,
+    "p50_ms": 206,
+    "avg_tokens": 735,
+    "errors": 0
+  },
+  "rows": [
+    {
+      "id": "L1",
+      "category": "lookup",
+      "ms": 640,
+      "chars": 12909,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 46  (cols: qn label file lines rank)\n  repos-react.compiler.packages.babel-plugin-react-compiler.src.__tests__.fixtures.compiler.globals-dont-resolve-local-useState.useState Function compiler/packages/babel-plugin-react-compiler/src/__tests__/fixtures/compiler/globals-dont-resolve-local-useState.js 4-7 -48.16\n  repos-react.packages.react-debug-tools.src.__tests__.ReactHooksInspection-test"
+    },
+    {
+      "id": "L2",
+      "category": "lookup",
+      "ms": 200,
+      "chars": 1742,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 13  (cols: qn label file lines rank)\n  repos-react.packages.react.src.__tests__.testDefinitions.ReactDOMClient.d.createRoot Function packages/react/src/__tests__/testDefinitions/ReactDOMClient.d.ts 16-16 -52.7\n  repos-react.packages.use-sync-external-store.src.__tests__.useSyncExternalStoreShared-test.createRoot Function packages/use-sync-external-store/src/__tests__/useSyncExternalStoreS"
+    },
+    {
+      "id": "L3",
+      "category": "lookup",
+      "ms": 197,
+      "chars": 264,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "results: 1  (cols: qn label file lines rank)\n  repos-react.packages.react.src.jsx.ReactJSXElement.jsxProd Function packages/react/src/jsx/ReactJSXElement.js 291-348 -55.14\ntotal: 1\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 1\nhas_more: false\ntruncated: false\n\n"
+    },
+    {
+      "id": "L4",
+      "category": "lookup",
+      "ms": 184,
+      "chars": 137,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 0  (cols: qn label file lines rank)\ntotal: 0\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 0\nhas_more: false\ntruncated: false\n\n"
+    },
+    {
+      "id": "L5",
+      "category": "lookup",
+      "ms": 206,
+      "chars": 636,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 3  (cols: qn label file lines rank)\n  repos-react.packages.scheduler.npm.umd.scheduler.development.unstable_scheduleCallback Function packages/scheduler/npm/umd/scheduler.development.js 27-32 -55.02\n  repos-react.packages.scheduler.npm.umd.scheduler.production.min.unstable_scheduleCallback Function packages/scheduler/npm/umd/scheduler.production.min.js 27-32 -54.79\n  repos-react.packages."
+    },
+    {
+      "id": "C1",
+      "category": "callgraph",
+      "ms": 205,
+      "chars": 456,
+      "recall": 0.3333333333333333,
+      "hit": true,
+      "error": null,
+      "sample": "results: 2  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.ReactFiberWorkLoop.scheduleUpdateOnFiber Function packages/react-reconciler/src/ReactFiberWorkLoop.js 987-1113 -55.93\n  repos-react.packages.react-reconciler.src.ReactFiberHooks.scheduleUpdateOnFiber Function packages/react-reconciler/src/ReactFiberHooks.js 3814-3831 -55.93\ntotal: 2\ntotal_relation: eq\nsearch_m"
+    },
+    {
+      "id": "C2",
+      "category": "callgraph",
+      "ms": 407,
+      "chars": 431,
+      "recall": 0.5,
+      "hit": true,
+      "error": null,
+      "sample": "results: 0  (cols: qn label file lines rank)\ntotal: 0\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 0\nhas_more: false\ntruncated: false\n\nresults: 1  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.ReactFiberWorkLoop.requestUpdateLane Function packages/react-reconciler/src/ReactFiberWorkLoop.js 812-868 -56.89\ntotal: 1\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 1\nhas"
+    },
+    {
+      "id": "C3",
+      "category": "callgraph",
+      "ms": 580,
+      "chars": 601,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 1  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.ReactFiberHydrationContext.popHydrationStateOnInterruptedWork Function packages/react-reconciler/src/ReactFiberHydrationContext.js 878-905 -12.34\ntotal: 1\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 1\nhas_more: false\ntruncated: false\n\nresults: 0  (cols: qn label file lines rank)\ntotal: 0\ntotal_relation: eq\n"
+    },
+    {
+      "id": "C4",
+      "category": "callgraph",
+      "ms": 395,
+      "chars": 615,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "results: 1  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.ReactFiberCommitWork.commitMutationEffects Function packages/react-reconciler/src/ReactFiberCommitWork.js 2027-2044 -56.89\ntotal: 1\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 1\nhas_more: false\ntruncated: false\n\nresults: 1  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.ReactFi"
+    },
+    {
+      "id": "C5",
+      "category": "callgraph",
+      "ms": 195,
+      "chars": 137,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 0  (cols: qn label file lines rank)\ntotal: 0\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 0\nhas_more: false\ntruncated: false\n\n"
+    },
+    {
+      "id": "A1",
+      "category": "architecture",
+      "ms": 186,
+      "chars": 137,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 0  (cols: qn label file lines rank)\ntotal: 0\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 0\nhas_more: false\ntruncated: false\n\n"
+    },
+    {
+      "id": "A2",
+      "category": "architecture",
+      "ms": 380,
+      "chars": 8991,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "results: 1  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.ReactFiberThrow.throwException Function packages/react-reconciler/src/ReactFiberThrow.js 364-705 -57.03\ntotal: 1\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 1\nhas_more: false\ntruncated: false\n\nresults: 50  (cols: qn label file lines rank)\n  repos-react.fixtures.dom.src.components.fixtures.suspense.AsyncStep"
+    },
+    {
+      "id": "A3",
+      "category": "architecture",
+      "ms": 194,
+      "chars": 325,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "results: 1  (cols: qn label file lines rank)\n  repos-react.packages.react-dom-bindings.src.events.DOMPluginEventSystem.listenToAllSupportedEvents Function packages/react-dom-bindings/src/events/DOMPluginEventSystem.js 432-459 -56.09\ntotal: 1\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 1\nhas_more: false\ntruncated: false\n\n"
+    },
+    {
+      "id": "A4",
+      "category": "architecture",
+      "ms": 381,
+      "chars": 8850,
+      "recall": 0.5,
+      "hit": true,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.packages.scheduler.src.forks.Scheduler.if Function packages/scheduler/src/forks/Scheduler.js 503-527 -18.83\n  repos-react.packages.scheduler.src.forks.Scheduler.requestPaint Function packages/scheduler/src/forks/Scheduler.js 474-479 -18.78\n  repos-react.packages.scheduler.src.forks.Scheduler.forceFrameRate Function packages/scheduler/src/"
+    },
+    {
+      "id": "A5",
+      "category": "architecture",
+      "ms": 389,
+      "chars": 274,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 0  (cols: qn label file lines rank)\ntotal: 0\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 0\nhas_more: false\ntruncated: false\n\nresults: 0  (cols: qn label file lines rank)\ntotal: 0\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 0\nhas_more: false\ntruncated: false\n\n"
+    },
+    {
+      "id": "I1",
+      "category": "impact",
+      "ms": 194,
+      "chars": 294,
+      "recall": 0.25,
+      "hit": true,
+      "error": null,
+      "sample": "results: 1  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.ReactFiberWorkLoop.requestUpdateLane Function packages/react-reconciler/src/ReactFiberWorkLoop.js 812-868 -56.89\ntotal: 1\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 1\nhas_more: false\ntruncated: false\n\n"
+    },
+    {
+      "id": "I2",
+      "category": "impact",
+      "ms": 193,
+      "chars": 7936,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 50  (cols: qn label file lines rank)\n  repos-react.packages.scheduler.src.__tests__.SchedulerMock-test.inferPriorityFromCallstack Function packages/scheduler/src/__tests__/SchedulerMock-test.js 449-478 -20.63\n  repos-react.packages.scheduler.src.forks.Scheduler.if Function packages/scheduler/src/forks/Scheduler.js 503-527 -18.83\n  repos-react.packages.scheduler.src.forks.Scheduler.request"
+    },
+    {
+      "id": "I3",
+      "category": "impact",
+      "ms": 198,
+      "chars": 137,
+      "recall": 0,
+      "hit": false,
+      "error": null,
+      "sample": "results: 0  (cols: qn label file lines rank)\ntotal: 0\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 0\nhas_more: false\ntruncated: false\n\n"
+    },
+    {
+      "id": "I4",
+      "category": "impact",
+      "ms": 394,
+      "chars": 13059,
+      "recall": 1,
+      "hit": true,
+      "error": null,
+      "sample": "results: 1  (cols: qn label file lines rank)\n  repos-react.packages.react-reconciler.src.ReactFiberWorkLoop.flushPassiveEffects Function packages/react-reconciler/src/ReactFiberWorkLoop.js 4691-4726 -55.52\ntotal: 1\ntotal_relation: eq\nsearch_mode: bm25\nreturned: 1\nhas_more: false\ntruncated: false\n\nresults: 49  (cols: qn label file lines rank)\n  repos-react.packages.react-devtools-shared.src.devtool"
+    },
+    {
+      "id": "I5",
+      "category": "impact",
+      "ms": 396,
+      "chars": 837,
+      "recall": 0.5,
+      "hit": true,
+      "error": null,
+      "sample": "results: 3  (cols: qn label file lines rank)\n  repos-react.packages.react.src.__tests__.testDefinitions.ReactDOMClient.d.hydrateRoot Function packages/react/src/__tests__/testDefinitions/ReactDOMClient.d.ts 17-17 -55.15\n  repos-react.CHANGELOG.React-DOM-Client Section CHANGELOG.md 617-618 -4.16\n  repos-react.packages.react-devtools.CHANGELOG.Breaking-change Section packages/react-devtools/CHANGELO"
+    }
+  ]
+}

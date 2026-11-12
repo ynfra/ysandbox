@@ -1,0 +1,26 @@
+# ygitbox write policy for this repo. First matching rule wins.
+# Modes: direct (commit to main), propose (change + PR + approval),
+#        readonly (never writable over ygitbox), deny (not even readable).
+# This file itself is always read-only over ygitbox: change it in Git.
+version: 1
+default_mode: propose
+default_approvals: 1
+limits:
+  max_file_bytes: 262144
+  max_files_per_change: 50
+
+rules:
+  - paths: ["skills/**"]
+    mode: propose
+    approvals: 1
+    reviewers: ["role:maintainer"]
+
+  # Everyone gets a personal scratch folder that needs no review.
+  - paths: ["notes/{user}/**"]
+    mode: direct
+
+  - paths: ["notes/**"]
+    mode: readonly
+
+  - paths: ["secrets/**"]
+    mode: deny

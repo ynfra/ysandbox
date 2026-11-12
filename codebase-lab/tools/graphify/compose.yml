@@ -1,0 +1,69 @@
+# graphify: LLM-free tree-sitter code graph, served over MCP (Streamable HTTP).
+# Paths are relative to this folder. One graph.json per server, so the lab
+# serves ONE repo at a time, chosen by GRAPHIFY_REPO (default zustand):
+#   GRAPHIFY_REPO=react docker compose --profile graphify run --rm graphify-index update /repos/react
+#   GRAPHIFY_REPO=react docker compose --profile graphify up -d --wait graphify
+x-graphify-build: &build
+  context: https://github.com/Graphify-Labs/graphify.git#${GRAPHIFY_VERSION:-v0.9.99}
+  dockerfile: Dockerfile
+
+services:
+  # MCP server. Reads the graph only, so /data is read-only. The key is a fixed
+  # lab value (sandbox-only); upstream reads it from GRAPHIFY_API_KEY itself.
+  graphify:
+    profiles: ["graphify"]
+    build: *build
+    image: graphify:${GRAPHIFY_VERSION:-v0.9.99}
+    restart: unless-stopped
+    ports:
+      - "4390:8080"
+    environment:
+      GRAPHIFY_API_KEY: ${GRAPHIFY_API_KEY:-lab-graphify}
+    volumes:
+      - ../../.docker/graphify/${GRAPHIFY_REPO:-zustand}:/data:ro
+    command: [/data/graph.json, --transport, http, --host, "0.0.0.0", --port, "8080"]
+    # A missing graph.json still boots and answers every tool with an
+    # isError:false "not found" text, so health needs the file AND the port.
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "python -c \"import os,sys,socket;p='/data/graph.json';sys.exit(1) if not os.path.exists(p) or os.path.getsize(p)==0 else socket.create_connection(('127.0.0.1',8080),timeout=5).close()\""
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 15s
+
+  # One-shot indexer (benchmark times this). `update` = tree-sitter only, no LLM.
+  # Root, because the host-created output dir is not writable by uid 10001.
+  graphify-index:
+    profiles: ["graphify"]
+    build: *build
+    image: graphify:${GRAPHIFY_VERSION:-v0.9.99}
+    user: "0:0"
+    environment:
+      GRAPHIFY_OUT: /data
+      GRAPHIFY_MAX_WORKERS: ${GRAPHIFY_MAX_WORKERS:-4}
+    volumes:
+      - ../../.docker/repos:/repos:ro
+      - ../../.docker/graphify/${GRAPHIFY_REPO:-zustand}:/data
+    entrypoint: ["graphify"]
+    command: ["--help"]
+
+  # Auto-update: git-sync POSTs {"repo",...} here; for GRAPHIFY_REPO it re-runs
+  # the incremental `graphify update`. Add http://graphify-hook:8080/ to
+  # SYNC_NOTIFY_URLS. Internal only (no host port).
+  graphify-hook:
+    profiles: ["graphify"]
+    build: *build
+    image: graphify:${GRAPHIFY_VERSION:-v0.9.99}
+    restart: unless-stopped
+    user: "0:0"
+    environment:
+      GRAPHIFY_OUT: /data
+      GRAPHIFY_REPO: ${GRAPHIFY_REPO:-zustand}
+      GRAPHIFY_MAX_WORKERS: ${GRAPHIFY_MAX_WORKERS:-4}
+    volumes:
+      - ../../.docker/repos:/repos:ro
+      - ../../.docker/graphify/${GRAPHIFY_REPO:-zustand}:/data
+      - ./hook.py:/hook.py:ro
+    entrypoint: ["python", "/hook.py"]

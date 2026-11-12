@@ -1,0 +1,195 @@
+{
+  "tool": "grep",
+  "repo": "react",
+  "kind": "retrieval-nl",
+  "at": "2026-11-01T20:51:10.629Z",
+  "summary": {
+    "hit_rate": 0.75,
+    "recall": 0.65,
+    "p50_ms": 168,
+    "avg_tokens": 123,
+    "errors": 0
+  },
+  "rows": [
+    {
+      "id": "L1",
+      "category": "lookup",
+      "ms": 503,
+      "chars": 490,
+      "recall": 1,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "L2",
+      "category": "lookup",
+      "ms": 134,
+      "chars": 523,
+      "recall": 0,
+      "hit": false,
+      "error": null
+    },
+    {
+      "id": "L3",
+      "category": "lookup",
+      "ms": 162,
+      "chars": 457,
+      "recall": 1,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "L4",
+      "category": "lookup",
+      "ms": 150,
+      "chars": 538,
+      "recall": 0,
+      "hit": false,
+      "error": null
+    },
+    {
+      "id": "L5",
+      "category": "lookup",
+      "ms": 168,
+      "chars": 483,
+      "recall": 1,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "C1",
+      "category": "callgraph",
+      "ms": 146,
+      "chars": 533,
+      "recall": 1,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "C2",
+      "category": "callgraph",
+      "ms": 166,
+      "chars": 480,
+      "recall": 1,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "C3",
+      "category": "callgraph",
+      "ms": 198,
+      "chars": 570,
+      "recall": 1,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "C4",
+      "category": "callgraph",
+      "ms": 242,
+      "chars": 568,
+      "recall": 1,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "C5",
+      "category": "callgraph",
+      "ms": 131,
+      "chars": 474,
+      "recall": 1,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "A1",
+      "category": "architecture",
+      "ms": 158,
+      "chars": 496,
+      "recall": 1,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "A2",
+      "category": "architecture",
+      "ms": 178,
+      "chars": 472,
+      "recall": 0,
+      "hit": false,
+      "error": null
+    },
+    {
+      "id": "A3",
+      "category": "architecture",
+      "ms": 160,
+      "chars": 516,
+      "recall": 0,
+      "hit": false,
+      "error": null
+    },
+    {
+      "id": "A4",
+      "category": "architecture",
+      "ms": 162,
+      "chars": 464,
+      "recall": 0,
+      "hit": false,
+      "error": null
+    },
+    {
+      "id": "A5",
+      "category": "architecture",
+      "ms": 130,
+      "chars": 475,
+      "recall": 1,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "I1",
+      "category": "impact",
+      "ms": 172,
+      "chars": 423,
+      "recall": 0.5,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "I2",
+      "category": "impact",
+      "ms": 191,
+      "chars": 454,
+      "recall": 0.5,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "I3",
+      "category": "impact",
+      "ms": 206,
+      "chars": 465,
+      "recall": 0.5,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "I4",
+      "category": "impact",
+      "ms": 182,
+      "chars": 451,
+      "recall": 1,
+      "hit": true,
+      "error": null
+    },
+    {
+      "id": "I5",
+      "category": "impact",
+      "ms": 357,
+      "chars": 499,
+      "recall": 0.5,
+      "hit": true,
+      "error": null
+    }
+  ]
+}

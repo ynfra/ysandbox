@@ -1,0 +1,72 @@
+x-s3-env: &s3-env
+  AWS_ACCESS_KEY_ID: rustfsadmin
+  AWS_SECRET_ACCESS_KEY: rustfsadmin
+  AWS_REGION: us-east-1
+  CELLD_BUCKET: s3://cells
+  S3_ENDPOINT: http://rustfs:9000
+
+services:
+  # S3-compatible bucket: holds celld's deployments, every Durable Object's
+  # SQLite state, and the R2 binding's app files.
+  rustfs:
+    image: rustfs/rustfs:1.0.4
+    restart: unless-stopped
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # web console
+    environment:
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: rustfsadmin
+      RUSTFS_CONSOLE_ENABLE: "true"
+    volumes:
+      - ./.docker/rustfs:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9000/health"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  bucket-init:
+    image: amazon/aws-cli:2.17.0
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    environment: *s3-env
+    entrypoint: ["sh", "-c", "aws --endpoint-url $$S3_ENDPOINT s3 mb s3://cells 2>&1 | grep -v BucketAlreadyOwnedByYou || true"]
+
+  # One-shot: bundle platform/ and publish it to the bucket. Re-run with
+  # `make deploy`; running nodes adopt the new version without a restart.
+  deploy:
+    build: ./deployer
+    image: celld-apps-deployer
+    depends_on:
+      bucket-init:
+        condition: service_completed_successfully
+    environment: *s3-env
+    volumes:
+      - ./platform:/platform
+    working_dir: /platform
+    entrypoint: ["sh", "-c", "npm install --no-audit --no-fund --silent && celld deploy ."]
+
+  celld:
+    image: celld-apps-deployer
+    restart: unless-stopped
+    depends_on:
+      deploy:
+        condition: service_completed_successfully
+    environment:
+      <<: *s3-env
+      CELLD_WATCH: /var/lib/celld
+      CELLD_ADDR: 0.0.0.0:8080
+      CELLD_INTERNAL_ADDR: 0.0.0.0:8081   # peer/operator port, unauthenticated: never publish it
+      CELLD_ADVERTISE: celld:8081
+      RUST_LOG: warn
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./.docker/celld:/var/lib/celld
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/.well-known/celld/health"]
+      interval: 3s
+      timeout: 3s
+      retries: 40

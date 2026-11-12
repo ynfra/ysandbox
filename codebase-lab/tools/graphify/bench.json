@@ -1,0 +1,17 @@
+{
+  "tool": "graphify",
+  "profile": "graphify",
+  "llm_at_index": false,
+  "serve": "GRAPHIFY_REPO={repo} docker compose --profile graphify up -d --wait --force-recreate graphify",
+  "index": {
+    "mode": "oneshot",
+    "cmd": "GRAPHIFY_REPO={repo} docker compose --profile graphify run --rm graphify-index update /repos/{repo}",
+    "ready": null,
+    "timeout_s": 7200
+  },
+  "mcp": { "url": "http://localhost:4390/mcp", "headers": { "Authorization": "Bearer lab-graphify" } },
+  "search": { "tool": "query_graph", "args": { "question": "{query}" } },
+  "containers": ["codebase-lab-graphify-1"],
+  "disk": [".docker/graphify"],
+  "stop": "docker compose stop graphify graphify-hook"
+}

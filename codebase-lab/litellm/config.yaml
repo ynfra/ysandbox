@@ -1,0 +1,17 @@
+# Two stable names every tool in the lab uses. The model behind each comes
+# from the environment (.env), so the tools' own configs never change.
+model_list:
+  - model_name: chat
+    litellm_params:
+      model: os.environ/CHAT_MODEL_ID
+      api_base: os.environ/OLLAMA_BASE_URL
+  - model_name: embed
+    litellm_params:
+      model: os.environ/EMBED_MODEL_ID
+      api_base: os.environ/OLLAMA_BASE_URL
+
+litellm_settings:
+  # Small local models reject some OpenAI params (e.g. parallel_tool_calls);
+  # drop them instead of failing the whole request.
+  drop_params: true
+  request_timeout: 600

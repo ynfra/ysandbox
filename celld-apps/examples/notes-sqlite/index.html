@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Notes</title>
+<style>
+:root { color-scheme: light dark; }
+body { font: 16px/1.5 system-ui, sans-serif; max-width: 34rem; margin: 2rem auto; padding: 0 1rem; }
+form { display: flex; gap: .5rem; } input { flex: 1; padding: .5rem; }
+li { display: flex; justify-content: space-between; padding: .4rem 0; border-bottom: 1px solid #8884; }
+ul { list-style: none; padding: 0; }
+</style>
+</head>
+<body>
+<h1>Notes</h1>
+<form id="f"><input id="body" placeholder="Write a note" required><button>Add</button></form>
+<ul id="list"></ul>
+<script type="module">
+import { sql } from "/_api/client.js";
+const list = document.getElementById("list");
+async function load() {
+  const { rows } = await sql("SELECT id, body FROM notes ORDER BY id DESC");
+  list.replaceChildren(...rows.map((r) => {
+    const li = document.createElement("li");
+    const span = document.createElement("span"); span.textContent = r.body;
+    const del = document.createElement("button"); del.textContent = "Delete";
+    del.onclick = async () => { await sql("DELETE FROM notes WHERE id = ?", [r.id]); load(); };
+    li.append(span, del);
+    return li;
+  }));
+}
+document.getElementById("f").onsubmit = async (e) => {
+  e.preventDefault();
+  const input = document.getElementById("body");
+  await sql("INSERT INTO notes (body) VALUES (?)", [input.value]);
+  input.value = "";
+  load();
+};
+load();
+</script>
+</body>
+</html>
